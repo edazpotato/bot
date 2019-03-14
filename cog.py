@@ -664,7 +664,7 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
 
         return await alt_ctx.command.reinvoke(alt_ctx)
     
-   @jsk.command(name="repeat")
+    @jsk.command(name="repeat")
     async def jsk_repeat(self, ctx: commands.Context, times: int, *, command_string: str):
         """
         Runs a command multiple times in a row.
