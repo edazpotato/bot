@@ -33,7 +33,7 @@ from jishaku.codeblocks import Codeblock, CodeblockConverter
 from jishaku.exception_handling import ReplResponseReactor
 from jishaku.meta import __version__
 from jishaku.models import copy_context_with
-from jishaku.modules import ExtensionConverter
+from jishaku.modules import ExtensionConverter, package_version
 from jishaku.paginators import PaginatorInterface, WrappedFilePaginator, WrappedPaginator
 from jishaku.repl import AsyncCodeExecutor, Scope, all_inspections, get_var_dict_from_ctx
 from jishaku.shell import ShellReader
@@ -129,7 +129,8 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
         """
 
         summary = [
-            f"Jishaku v{__version__}, `Python {sys.version}` on `{sys.platform}`".replace("\n", ""),
+            f"Jishaku v{__version__}, discord.py `{package_version('discord.py')}`, "
+            f"`Python {sys.version}` on `{sys.platform}`".replace("\n", ""),
             f"Module was loaded {humanize.naturaltime(self.load_time)}, "
             f"cog was loaded {humanize.naturaltime(self.start_time)}.",
             ""
@@ -660,6 +661,22 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
             return await ctx.send(f'Command "{alt_ctx.invoked_with}" is not found')
 
         return await alt_ctx.command.reinvoke(alt_ctx)
+    
+   @jsk.command(name="repeat")
+    async def jsk_repeat(self, ctx: commands.Context, times: int, *, command_string: str):
+        """
+        Runs a command multiple times in a row.
+        This acts like the command was invoked several times manually, so it obeys cooldowns.
+        """
+
+        with self.submit(ctx):  # allow repeats to be cancelled
+            for _ in range(times):
+                alt_ctx = await copy_context_with(ctx, content=ctx.prefix + command_string)
+
+                if alt_ctx.command is None:
+                    return await ctx.send(f'Command "{alt_ctx.invoked_with}" is not found')
+
+                await alt_ctx.command.reinvoke(alt_ctx)
 
     @jsk.command(name="debug", aliases=["dbg"])
     async def jsk_debug(self, ctx: commands.Context, *, command_string: str):

@@ -15,6 +15,7 @@ import pathlib
 import typing
 
 from discord.ext import commands
+import pkg_resources
 
 __all__ = ('find_extensions_in', 'resolve_extensions', 'ExtensionConverter')
 
@@ -69,6 +70,16 @@ def resolve_extensions(bot: commands.Bot, name: str) -> list:
         return list(bot.extensions.keys())
 
     return [name]
+
+def package_version(package_name: str) -> typing.Optional[str]:
+    """
+    Returns package version as a string, or None if it couldn't be found.
+    """
+
+    try:
+        return pkg_resources.get_distribution(package_name).version
+    except (pkg_resources.DistributionNotFound, AttributeError):
+        return None
 
 
 class ExtensionConverter(commands.Converter):  # pylint: disable=too-few-public-methods
