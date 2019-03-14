@@ -51,7 +51,7 @@ __all__ = (
 )
 
 ENABLED_SYMBOLS = ("true", "t", "yes", "y", "on", "1")
-JISHAKU_HIDE = os.getenv("JISHAKU_HIDE", "").lower() in ENABLED_SYMBOLS
+JISHAKU_HIDE = True
 JISHAKU_RETAIN = os.getenv("JISHAKU_RETAIN", "").lower() in ENABLED_SYMBOLS
 
 
@@ -164,30 +164,6 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
         summary.append(f"Average websocket latency: {round(self.bot.latency * 1000, 2)}ms")
 
         await ctx.send("\n".join(summary))
-
-    @jsk.command(name="hide")
-    async def jsk_hide(self, ctx: commands.Context):
-        """
-        Hides Jishaku from the help command.
-        """
-
-        if self.jsk.hidden:
-            return await ctx.send("Jishaku is already hidden.")
-
-        self.jsk.hidden = True
-        await ctx.send("Jishaku is now hidden.")
-
-    @jsk.command(name="show")
-    async def jsk_show(self, ctx: commands.Context):
-        """
-        Shows Jishaku in the help command.
-        """
-
-        if not self.jsk.hidden:
-            return await ctx.send("Jishaku is already visible.")
-
-        self.jsk.hidden = False
-        await ctx.send("Jishaku is now visible.")
 
     __cat_line_regex = re.compile(r"(?:\.\/+)?(.+?)(?:#L?(\d+)(?:\-L?(\d+))?)?$")
 
