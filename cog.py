@@ -57,6 +57,8 @@ JISHAKU_RETAIN = os.getenv("JISHAKU_RETAIN", "").lower() in ENABLED_SYMBOLS
 
 CommandTask = collections.namedtuple("CommandTask", "index ctx task")
 
+print('Loading Jishaku....')
+
 
 class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
     """
@@ -739,3 +741,5 @@ def setup(bot: commands.Bot):
     """
 
     bot.add_cog(Jishaku(bot=bot))
+
+print('Jishaku has been loaded!')
