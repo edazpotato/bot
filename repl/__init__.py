@@ -27,6 +27,7 @@ def get_var_dict_from_ctx(ctx: commands.Context):
     return {
         '_author': ctx.author,
         '_bot': ctx.bot,
+        'fire': ctx.bot
         '_channel': ctx.channel,
         '_ctx': ctx,
         '_guild': ctx.guild,

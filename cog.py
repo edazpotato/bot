@@ -23,7 +23,6 @@ import re
 import sys
 import time
 import traceback
-import types
 import typing
 
 import discord
@@ -413,6 +412,7 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
 
         paginator = commands.Paginator(prefix='', suffix='')
         jishaku_in_trouble = False
+        jishaku_mod = sys.modules['jishaku']
 
         for extension in itertools.chain(*extensions):
             load_icon = "\N{CLOCKWISE RIGHTWARDS AND LEFTWARDS OPEN CIRCLE ARROWS}" \
@@ -435,16 +435,15 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
         
         if jishaku_in_trouble and 'Jishaku' not in ctx.bot.cogs:
             # something bad happened, this is not a normal unload
-            # load the current instance as a cog as a panic measure
-            ctx.bot.add_cog(self)
-            fake_module = types.ModuleType("jishaku")
-            sys.modules["jishaku"] = fake_module
-            ctx.bot.extensions["jishaku"] = fake_module
+           # reinstate the old module and load_extension
+            sys.modules['jishaku'] = jishaku_mod
+            self.bot.load_extension('jishaku')
 
             await ctx.send(
                 "Something went wrong, and Jishaku could not be reloaded. "
-                "I have tried to recover by loading the currently loaded cog under a fake module. "
-                "Try to work out what happened, and reload Jishaku again. Good luck with that lol"
+                "I have tried to recover by reinstating the current version of the module, "
+                "but while in this state some parts of the module may not work correctly or at all.\n"
+                "It is recommended to diagnose the problem and reload as soon as possible."
             )
 
     @jsk.command(name="unload")
@@ -651,6 +650,8 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
         alt_ctx = await copy_context_with(ctx, author=target, content=ctx.prefix + command_string)
 
         if alt_ctx.command is None:
+            if alt_ctx.invoked_with is None:
+                return await ctx.send('This bot has been hard-configured to ignore this user.')
             return await ctx.send(f'Command "{alt_ctx.invoked_with}" is not found')
 
         return await alt_ctx.command.invoke(alt_ctx)
