@@ -34,6 +34,7 @@ class CodeblockConverter(commands.Converter):  # pylint: disable=too-few-public-
     """
 
     async def convert(self, ctx, argument):
+        argument.replace('++', '&&')
         match = CODEBLOCK_REGEX.search(argument)
         if not match:
             return Codeblock(None, argument)
