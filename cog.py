@@ -12,11 +12,13 @@ The Jishaku debugging and diagnostics cog.
 """
 
 import asyncio
+import aiohttp
 import collections
 import contextlib
 import datetime
 import inspect
 import itertools
+import io
 import os
 import os.path
 import re
@@ -214,6 +216,39 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
 
         interface = PaginatorInterface(ctx.bot, paginator, owner=ctx.author)
         await interface.send_to(ctx)
+
+    @jsk.command(name="curl")
+    async def jsk_curl(self, ctx: commands.Context, url: str):
+        """
+        Download and display a text file from the internet.
+        This command is similar to jsk cat, but accepts a URL.
+        """
+
+        # remove embed maskers if present
+        url = url.lstrip("<").rstrip(">")
+
+        async with ReplResponseReactor(ctx.message):
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url) as response:
+                    data = await response.read()
+                    hints = (
+                        response.content_type,
+                        url
+                    )
+                    code = response.status
+
+            if not data:
+                return await ctx.send(f"HTTP response was empty (status code {code}).")
+
+            try:
+                paginator = WrappedFilePaginator(io.BytesIO(data), language_hints=hints, max_size=1985)
+            except UnicodeDecodeError:
+                return await ctx.send(f"Couldn't determine the encoding of the response. (status code {code})")
+            except ValueError as exc:
+                return await ctx.send(f"Couldn't read response (status code {code}), {exc}")
+
+            interface = PaginatorInterface(ctx.bot, paginator, owner=ctx.author)
+            await interface.send_to(ctx)
 
     @jsk.command(name="tasks")
     async def jsk_tasks(self, ctx: commands.Context):
