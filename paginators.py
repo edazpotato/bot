@@ -293,7 +293,7 @@ class PaginatorEmbedInterface(PaginatorInterface):
     """
 
     def __init__(self, *args, **kwargs):
-        self._embed = kwargs.pop('_embed', None) or discord.Embed()
+        self._embed = kwargs.pop('_embed', None)
         super().__init__(*args, **kwargs)
 
     @property
