@@ -36,7 +36,7 @@ from jishaku.exception_handling import ReplResponseReactor
 from jishaku.meta import __version__
 from jishaku.models import copy_context_with
 from jishaku.modules import ExtensionConverter, package_version
-from jishaku.paginators import PaginatorInterface, WrappedFilePaginator, WrappedPaginator
+from jishaku.paginators import PaginatorInterface, WrappedFilePaginator, WrappedPaginator, PaginatorEmbedInterface
 from jishaku.repl import AsyncCodeExecutor, Scope, all_inspections, get_var_dict_from_ctx
 from jishaku.shell import ShellReader
 from jishaku.voice import BasicYouTubeDLSource, connected_check, playing_check, vc_check, youtube_dl
@@ -332,6 +332,7 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
                         continue
 
                     self.last_result = result
+                    resulttype = type(result).__name__.capitalize()
 
                     if isinstance(result, discord.File):
                         await ctx.send(file=result)
@@ -347,17 +348,22 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
                         if len(result) > 2000:
                             # inconsistency here, results get wrapped in codeblocks when they are too large
                             #  but don't if they're not. probably not that bad, but noting for later review
+                            result.replace(self.bot.http.token, "[token ommited]")
                             paginator = WrappedPaginator(prefix='```py', suffix='```', max_size=1985)
-
                             paginator.add_line(result)
-
-                            interface = PaginatorInterface(ctx.bot, paginator, owner=ctx.author)
+                            embed = discord.Embed(title=":white_check_mark: Evaluation Complete", colour=ctx.author.color, description=f"Output Type: {resulttype}")
+                            embed.add_field(name=":inbox_tray: Input", value=f"```py\n{argument.content}```", inline=False)
+                            paginatorembed = discord.Embed(colour=ctx.author.color)
+                            interface = PaginatorEmbedInterface(ctx.bot, paginator, owner=ctx.author)
                             await interface.send_to(ctx)
                         else:
+                            result.replace(self.bot.http.token, "[token ommited]")
                             if result.strip() == '':
                                 result = "\u200b"
-
-                            await ctx.send(result.replace(self.bot.http.token, "[token omitted]"))
+                            embed = discord.Embed(title=":white_check_mark: Evaluation Complete", colour=ctx.author.color, description=f"Output Type: {resulttype}")
+                            embed.add_field(name=":inbox_tray: Input", value=f"```py\n{argument.content}```", inline=False)
+                            embed.add_field(name=":outbox_tray: Output", value=f"```py\n{result}```", inline=False)
+                            await ctx.send(embed=embed)
 
     @jsk.command(name="py_inspect", aliases=["pyi", "python_inspect", "pythoninspect"])
     async def jsk_python_inspect(self, ctx: commands.Context, *, argument: CodeblockConverter):
@@ -382,13 +388,17 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
                     if len(header) > 485:
                         header = header[0:482] + "..."
 
-                    paginator = WrappedPaginator(prefix=f"```prolog\n=== {header} ===\n", max_size=1985)
-
+                    output = []
+                    output.append(f'```prolog\n=== {header} ===\n')
                     for name, res in all_inspections(result):
-                        paginator.add_line(f"{name:16.16} :: {res}")
+                        output.append(f"{name:16.16} :: {res}")
+                    output.append('```')
+                    res = '\n'.join(output)
 
-                    interface = PaginatorInterface(ctx.bot, paginator, owner=ctx.author)
-                    await interface.send_to(ctx)
+                    embed = discord.Embed(title=":white_check_mark: Evaluation Complete", colour=ctx.author.color)
+                    embed.add_field(name=":inbox_tray: Input", value=f"```py\n{argument.content}```", inline=False)
+                    embed.add_field(name=":outbox_tray: Output", value=f"{res}", inline=False)
+                    await ctx.send(embed=embed)
 
     @jsk.command(name="shell", aliases=["sh", "cmd"])
     async def jsk_shell(self, ctx: commands.Context, *, argument: CodeblockConverter):
