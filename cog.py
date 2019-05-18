@@ -30,6 +30,7 @@ import typing
 import discord
 import humanize
 from discord.ext import commands
+from fire.push import pushbullet
 
 from jishaku.codeblocks import Codeblock, CodeblockConverter
 from jishaku.exception_handling import ReplResponseReactor
@@ -333,6 +334,13 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
 
                     self.last_result = result
                     resulttype = type(result).__name__.capitalize()
+                    if self.bot.http.token in result:
+                        result = '[result hidden for security reasons]'
+                        await pushbullet('note', 'Attempted Token Leak', f'{ctx.author} attempted to retrieve Fire\'s token', 'https://api.gaminggeek.club')
+                    tokenlist = self.bot.http.token.split('.')
+                    if all(x in result for x in tokenlist):
+                        result = '[result hidden for security reasons]'
+                        await pushbullet('note', 'Attempted Token Leak', f'{ctx.author} attempted to retrieve Fire\'s token', 'https://api.gaminggeek.club')
 
                     if isinstance(result, discord.File):
                         await ctx.send(file=result)
@@ -345,19 +353,18 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
                             # repr all non-strings
                             result = repr(result)
 
-                        if len(result) > 2000:
+                        if len(result) > 1024:
                             # inconsistency here, results get wrapped in codeblocks when they are too large
                             #  but don't if they're not. probably not that bad, but noting for later review
-                            result.replace(self.bot.http.token, "[token ommited]")
                             paginator = WrappedPaginator(prefix='```py', suffix='```', max_size=1985)
                             paginator.add_line(result)
                             embed = discord.Embed(title=":white_check_mark: Evaluation Complete", colour=ctx.author.color, description=f"Output Type: {resulttype}")
                             embed.add_field(name=":inbox_tray: Input", value=f"```py\n{argument.content}```", inline=False)
                             paginatorembed = discord.Embed(colour=ctx.author.color)
-                            interface = PaginatorEmbedInterface(ctx.bot, paginator, owner=ctx.author)
+                            interface = PaginatorEmbedInterface(ctx.bot, paginator, owner=ctx.author, _embed=paginatorembed)
+                            await ctx.send(embed=embed)
                             await interface.send_to(ctx)
                         else:
-                            result.replace(self.bot.http.token, "[token ommited]")
                             if result.strip() == '':
                                 result = "\u200b"
                             embed = discord.Embed(title=":white_check_mark: Evaluation Complete", colour=ctx.author.color, description=f"Output Type: {resulttype}")
@@ -382,6 +389,13 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
             with self.submit(ctx):
                 async for result in AsyncCodeExecutor(argument.content, scope, arg_dict=arg_dict):
                     self.last_result = result
+                    if self.bot.http.token in result:
+                        result = '[result hidden for security reasons]'
+                        await pushbullet('note', 'Attempted Token Leak', f'{ctx.author} attempted to retrieve Fire\'s token', 'https://api.gaminggeek.club')
+                    tokenlist = self.bot.http.token.split('')
+                    if all(x in result for x in tokenlist):
+                        result = '[result hidden for security reasons]'
+                        await pushbullet('note', 'Attempted Token Leak', f'{ctx.author} attempted to retrieve Fire\'s token', 'https://api.gaminggeek.club')
 
                     header = repr(result).replace("``", "`\u200b`").replace(self.bot.http.token, "[token omitted]")
 
