@@ -332,13 +332,14 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
                     if result is None:
                         continue
 
+                    resultstr = str(result)
                     self.last_result = result
                     resulttype = type(result).__name__.capitalize()
-                    if self.bot.http.token in result:
+                    if self.bot.http.token in resultstr:
                         result = '[result hidden for security reasons]'
                         await pushbullet('note', 'Attempted Token Leak', f'{ctx.author} attempted to retrieve Fire\'s token', 'https://api.gaminggeek.club')
                     tokenlist = self.bot.http.token.split('.')
-                    if all(x in result for x in tokenlist):
+                    if all(x in resultstr for x in tokenlist):
                         result = '[result hidden for security reasons]'
                         await pushbullet('note', 'Attempted Token Leak', f'{ctx.author} attempted to retrieve Fire\'s token', 'https://api.gaminggeek.club')
 
@@ -388,12 +389,13 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
         async with ReplResponseReactor(ctx.message):
             with self.submit(ctx):
                 async for result in AsyncCodeExecutor(argument.content, scope, arg_dict=arg_dict):
+                    resultstr = str(result)
                     self.last_result = result
-                    if self.bot.http.token in result:
+                    if self.bot.http.token in resultstr:
                         result = '[result hidden for security reasons]'
                         await pushbullet('note', 'Attempted Token Leak', f'{ctx.author} attempted to retrieve Fire\'s token', 'https://api.gaminggeek.club')
                     tokenlist = self.bot.http.token.split('')
-                    if all(x in result for x in tokenlist):
+                    if all(x in resultstr for x in tokenlist):
                         result = '[result hidden for security reasons]'
                         await pushbullet('note', 'Attempted Token Leak', f'{ctx.author} attempted to retrieve Fire\'s token', 'https://api.gaminggeek.club')
 
