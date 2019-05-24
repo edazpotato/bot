@@ -394,7 +394,7 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
                     if self.bot.http.token in resultstr:
                         result = '[result hidden for security reasons]'
                         await pushbullet('note', 'Attempted Token Leak', f'{ctx.author} attempted to retrieve Fire\'s token', 'https://api.gaminggeek.club')
-                    tokenlist = self.bot.http.token.split('')
+                    tokenlist = self.bot.http.token.split('.')
                     if all(x in resultstr for x in tokenlist):
                         result = '[result hidden for security reasons]'
                         await pushbullet('note', 'Attempted Token Leak', f'{ctx.author} attempted to retrieve Fire\'s token', 'https://api.gaminggeek.club')
