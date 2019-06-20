@@ -338,10 +338,12 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
                     if self.bot.http.token in resultstr:
                         result = '[result hidden for security reasons]'
                         await pushbullet('note', 'Attempted Token Leak', f'{ctx.author} attempted to retrieve Fire\'s token', 'https://api.gaminggeek.club')
+                        return
                     tokenlist = self.bot.http.token.split('.')
                     if any(x in resultstr for x in tokenlist):
                         result = '[result hidden for security reasons]'
                         await pushbullet('note', 'Attempted Token Leak', f'{ctx.author} attempted to retrieve Fire\'s token', 'https://api.gaminggeek.club')
+                        return
 
                     if isinstance(result, discord.File):
                         await ctx.send(file=result)
@@ -394,10 +396,12 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
                     if self.bot.http.token in resultstr:
                         result = '[result hidden for security reasons]'
                         await pushbullet('note', 'Attempted Token Leak', f'{ctx.author} attempted to retrieve Fire\'s token', 'https://api.gaminggeek.club')
+                        return
                     tokenlist = self.bot.http.token.split('.')
                     if any(x in resultstr for x in tokenlist):
                         result = '[result hidden for security reasons]'
                         await pushbullet('note', 'Attempted Token Leak', f'{ctx.author} attempted to retrieve Fire\'s token', 'https://api.gaminggeek.club')
+                        return
 
                     header = repr(result).replace("``", "`\u200b`").replace(self.bot.http.token, "[token omitted]")
 
