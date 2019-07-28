@@ -361,7 +361,7 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
                             #  but don't if they're not. probably not that bad, but noting for later review
                             paginator = WrappedPaginator(prefix='```py', suffix='```', max_size=1985)
                             paginator.add_line(result)
-                            embed = discord.Embed(title=":white_check_mark: Evaluation Complete", colour=ctx.author.color, description=f"Output Type: {resulttype}")
+                            embed = discord.Embed(title="<a:fireSuccess:603214443442077708> Evaluation Complete", colour=ctx.author.color, description=f"Output Type: {resulttype}")
                             embed.add_field(name=":inbox_tray: Input", value=f"```py\n{argument.content}```", inline=False)
                             paginatorembed = discord.Embed(colour=ctx.author.color)
                             interface = PaginatorEmbedInterface(ctx.bot, paginator, owner=ctx.author, _embed=paginatorembed)
@@ -370,7 +370,7 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
                         else:
                             if result.strip() == '':
                                 result = "\u200b"
-                            embed = discord.Embed(title=":white_check_mark: Evaluation Complete", colour=ctx.author.color, description=f"Output Type: {resulttype}")
+                            embed = discord.Embed(title="<a:fireSuccess:603214443442077708> Evaluation Complete", colour=ctx.author.color, description=f"Output Type: {resulttype}")
                             embed.add_field(name=":inbox_tray: Input", value=f"```py\n{argument.content}```", inline=False)
                             embed.add_field(name=":outbox_tray: Output", value=f"```py\n{result}```", inline=False)
                             await ctx.send(embed=embed)
@@ -415,7 +415,7 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
                     output.append('```')
                     res = '\n'.join(output)
 
-                    embed = discord.Embed(title=":white_check_mark: Evaluation Complete", colour=ctx.author.color)
+                    embed = discord.Embed(title="<a:fireSuccess:603214443442077708> Evaluation Complete", colour=ctx.author.color)
                     embed.add_field(name=":inbox_tray: Input", value=f"```py\n{argument.content}```", inline=False)
                     embed.add_field(name=":outbox_tray: Output", value=f"{res}", inline=False)
                     await ctx.send(embed=embed)
@@ -495,6 +495,13 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
                 )
             else:
                 paginator.add_line(f"{icon} `{extension}`", empty=True)
+
+        await self.bot.get_cog('Settings').loadLogChannels()
+        await self.bot.get_cog('Mod Commands').loadMutes()
+        await self.bot.get_cog('Premium Commands').loadPremiumGuilds()
+        await self.bot.get_cog('Premium Commands').loadAutoroles()
+        await self.bot.get_cog('Premium Commands').loadReactroles()
+        await self.bot.get_cog('Premium Commands').loadJoinRoles()
 
         for page in paginator.pages:
             await ctx.send(page)
