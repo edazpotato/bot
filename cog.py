@@ -120,6 +120,8 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
         """
         if ctx.author.id == 524905372897640457:
             return True
+        if ctx.author.id == 376817315830038530:
+            return False
         if not await ctx.bot.is_owner(ctx.author):
             raise commands.NotOwner("You must own this bot to use Jishaku.")
         return True
@@ -380,6 +382,8 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
         """
         Evaluation of Python code with inspect information.
         """
+        if ctx.author.id == 376817315830038530:
+            return await ctx.send('No eval for you buddy!!! This is my bot, this is MY land, you CANNOT come close to the might of Geek')
 
         arg_dict = get_var_dict_from_ctx(ctx)
 
