@@ -231,7 +231,7 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
         url = url.lstrip("<").rstrip(">")
 
         async with ReplResponseReactor(ctx.message):
-            async with aiohttp.ClientSession() as session:
+            async with aiohttp.ClientSession(headers={'User-Agent': 'Fire Discord Bot'}) as session:
                 async with session.get(url) as response:
                     data = await response.read()
                     hints = (
