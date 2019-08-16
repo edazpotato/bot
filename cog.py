@@ -483,6 +483,11 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
         paginator = commands.Paginator(prefix='', suffix='')
 
         for extension in itertools.chain(*extensions):
+            if extension == 'cogs.api':
+                try:
+                    await self.bot.get_cog('Fire API').stop()
+                except Exception:
+                    do = 'nothing'
             method, icon = (
                 (self.bot.reload_extension, "\N{CLOCKWISE RIGHTWARDS AND LEFTWARDS OPEN CIRCLE ARROWS}")
                 if extension in self.bot.extensions else
@@ -498,6 +503,8 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
                     empty=True
                 )
             else:
+                if extension == 'cogs.api':
+                    await self.bot.get_cog('Fire API').start()
                 paginator.add_line(f"{icon} `{extension}`", empty=True)
 
         await self.bot.get_cog('Settings').loadLogChannels()
@@ -523,6 +530,8 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
 
         for extension in itertools.chain(*extensions):
             try:
+                if extension == 'cogs.api':
+                    await self.bot.get_cog('Fire API').stop()
                 self.bot.unload_extension(extension)
             except Exception as exc:  # pylint: disable=broad-except
                 traceback_data = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__, 1))
