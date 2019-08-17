@@ -483,7 +483,7 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
         paginator = commands.Paginator(prefix='', suffix='')
 
         for extension in itertools.chain(*extensions):
-            if extension == 'cogs.api':
+            if extension == 'fishin.abucket':
                 try:
                     await self.bot.get_cog('Fire API').stop()
                 except Exception:
@@ -503,7 +503,7 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
                     empty=True
                 )
             else:
-                if extension == 'cogs.api':
+                if extension == 'fishin.abucket':
                     await self.bot.get_cog('Fire API').start()
                 paginator.add_line(f"{icon} `{extension}`", empty=True)
 
@@ -530,7 +530,7 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
 
         for extension in itertools.chain(*extensions):
             try:
-                if extension == 'cogs.api':
+                if extension == 'fishin.abucket':
                     await self.bot.get_cog('Fire API').stop()
                 self.bot.unload_extension(extension)
             except Exception as exc:  # pylint: disable=broad-except
