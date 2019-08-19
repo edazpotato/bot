@@ -229,6 +229,11 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
 
         # remove embed maskers if present
         url = url.lstrip("<").rstrip(">")
+        if 'api.hypixel.net' in url:
+            if '?' in url:
+                url = f'{url}&key={self.bot.hypixelkey}'
+            else:
+                url = f'{url}?key={self.bot.hypixelkey}'
 
         async with ReplResponseReactor(ctx.message):
             async with aiohttp.ClientSession(headers={'User-Agent': 'Fire Discord Bot'}) as session:
