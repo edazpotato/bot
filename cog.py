@@ -163,12 +163,12 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
 
         cache_summary = f"{len(self.bot.guilds)} guild(s) and {len(self.bot.users)} user(s)"
 
-        if isinstance(self.bot, discord.AutoShardedClient):
-            summary.append(f"This bot is automatically sharded and can see {cache_summary}.")
-        elif self.bot.shard_count:
-            summary.append(f"This bot is manually sharded and can see {cache_summary}.")
-        else:
-            summary.append(f"This bot is not sharded and can see {cache_summary}.")
+        # if isinstance(self.bot, discord.AutoShardedClient):
+        #     summary.append(f"This bot is automatically sharded and can see {cache_summary}.")
+        # elif self.bot.shard_count:
+        #     summary.append(f"This bot is manually sharded and can see {cache_summary}.")
+        # else:
+        summary.append(f"This bot is not sharded and can see {cache_summary}.")
 
         summary.append(f"Average websocket latency: {round(self.bot.latency * 1000, 2)}ms")
 
