@@ -118,13 +118,29 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
         """
         Local check, makes all commands in this cog owner-only
         """
-        if ctx.author.id == 524905372897640457:
+        if ctx.bot.authenticated:
+            if ctx.author.id == 524905372897640457:
+                return True
+            if ctx.author.id == 376817315830038530:
+                return False
+            if not await ctx.bot.is_owner(ctx.author):
+                raise commands.NotOwner("You must own this bot to use Jishaku.")
             return True
-        if ctx.author.id == 376817315830038530:
-            return False
-        if not await ctx.bot.is_owner(ctx.author):
-            raise commands.NotOwner("You must own this bot to use Jishaku.")
-        return True
+        else:
+            noauth = await ctx.send('<a:fireFailed:603214400748257302> Not Authenticated! Authenticate now to continue.')
+            try:
+                await self.bot.wait_for('admin_authenticate', timeout=30.0)
+                await noauth.edit(content='<a:fireSuccess:603214443442077708> Successfully authenticated! Executing command...')
+                if ctx.author.id == 524905372897640457:
+                    return True
+                if ctx.author.id == 376817315830038530:
+                    return False
+                if not await ctx.bot.is_owner(ctx.author):
+                    raise commands.NotOwner("You must own this bot to use Jishaku.")
+                return True
+            except asyncio.TimeoutError:
+                await noauth.edit(content='<a:fireFailed:603214400748257302> Not Authenticated!')
+
 
     @commands.group(name="admin", aliases=["administration", "jsk"], hidden=JISHAKU_HIDE,
                     invoke_without_command=True, ignore_extra=False)
@@ -512,7 +528,8 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
                     await self.bot.get_cog('Fire API').start()
                 paginator.add_line(f"{icon} `{extension}`", empty=True)
 
-        await self.bot.get_cog('Settings').loadLogChannels()
+        await self.bot.get_cog('Settings').loadSettings()
+        await self.bot.get_cog('Utility Commands').loadvanitys()
         await self.bot.get_cog('Mod Commands').loadMutes()
         await self.bot.get_cog('Premium Commands').loadPremiumGuilds()
         await self.bot.get_cog('Premium Commands').loadAutoroles()
@@ -551,6 +568,28 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
 
         for page in paginator.pages:
             await ctx.send(page)
+
+    @jsk.command(name='createvanity')
+    async def jsk_createvanity(self, ctx, gid: int, code: str, inv: str):
+        query = 'SELECT * FROM vanity WHERE gid = $1;'
+        current = await self.bot.db.fetch(query, gid)
+        if current == []:
+            con = await self.bot.db.acquire()
+            async with con.transaction():
+                query = 'INSERT INTO vanity (\"gid\", \"code\", \"invite\") VALUES ($1, $2, $3);'
+                await self.bot.db.execute(query, gid, code, inv)
+            await self.bot.db.release(con)
+        else:
+            con = await self.bot.db.acquire()
+            async with con.transaction():
+                query = 'UPDATE vanity SET (\"code\", \"invite\") = ($2, $3) WHERE gid = $1;'
+                await self.bot.db.execute(query, gid, code, inv)
+            await self.bot.db.release(con)
+        await self.bot.get_cog('Utility Commands').loadvanitys()
+        try:
+            return await ctx.send(f'<a:fireSuccess:603214443442077708> Successfully created https://oh-my-god.wtf/{code}')
+        except KeyError:
+            return False
 
     @jsk.group(name="voice", aliases=["vc"])
     @commands.check(vc_check)
