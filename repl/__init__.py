@@ -25,12 +25,19 @@ def get_var_dict_from_ctx(ctx: commands.Context):
     """
 
     return {
-        '_author': ctx.author,
-        '_bot': ctx.bot,
+        'me': ctx.author,
         'fire': ctx.bot,
-        '_channel': ctx.channel,
-        '_ctx': ctx,
-        '_guild': ctx.guild,
-        '_message': ctx.message,
-        '_msg': ctx.message
+        'self': ctx.bot.get_cog('Jishaku'),
+        'MAIN': ctx.bot.get_cog('Main Commands'),
+        'MUSIC': ctx.bot.get_cog('Music'),
+        'HYPIXEL': ctx.bot.get_cog('Hypixel Commands'),
+        'ksoft': ctx.bot.ksoft,
+        'UTILS': ctx.bot.get_cog('Utility Commands'),
+        'SETTINGS': ctx.bot.get_cog('Settings'),
+        'API': ctx.bot.get_cog('Fire API'),
+        'PREMIUM': ctx.bot.get_cog('Premium Commands'),
+        'channel': ctx.channel,
+        'ctx': ctx,
+        'guild': ctx.guild,
+        'message': ctx.message
     }
