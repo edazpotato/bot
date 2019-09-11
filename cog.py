@@ -571,20 +571,11 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
 
     @jsk.command(name='createvanity')
     async def jsk_createvanity(self, ctx, gid: int, code: str, inv: str):
-        query = 'SELECT * FROM vanity WHERE gid = $1;'
-        current = await self.bot.db.fetch(query, gid)
-        if current == []:
-            con = await self.bot.db.acquire()
-            async with con.transaction():
-                query = 'INSERT INTO vanity (\"gid\", \"code\", \"invite\") VALUES ($1, $2, $3);'
-                await self.bot.db.execute(query, gid, code, inv)
-            await self.bot.db.release(con)
-        else:
-            con = await self.bot.db.acquire()
-            async with con.transaction():
-                query = 'UPDATE vanity SET (\"code\", \"invite\") = ($2, $3) WHERE gid = $1;'
-                await self.bot.db.execute(query, gid, code, inv)
-            await self.bot.db.release(con)
+        con = await self.bot.db.acquire()
+        async with con.transaction():   
+            query = 'INSERT INTO vanity (\"gid\", \"code\", \"invite\") VALUES ($1, $2, $3);'
+            await self.bot.db.execute(query, gid, code, inv)
+        await self.bot.db.release(con)
         await self.bot.get_cog('Utility Commands').loadvanitys()
         try:
             return await ctx.send(f'<a:fireSuccess:603214443442077708> Successfully created https://oh-my-god.wtf/{code}')
