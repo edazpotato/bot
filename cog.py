@@ -470,17 +470,22 @@ console.log('EVAL ERROR ' + JSON.stringify(evaloutput));'''.format(code)
 						output.append(line)
 
 			output = '\n'.join(output).replace('[stderr] ', '')
-			error = json.loads(output.split('EVAL ERROR ')[-1])
-			error = error['error']
-			if error == 'NO ERROR':
-				success = True
-				output = output.replace('EVAL ERROR {"error":"NO ERROR"}', '')
-			else:
+			if 'C:\\Users\\Administrator\\Documents\\Geek\\Fire\\main.js:' in output:
+				error = output
+				output = None
 				success = False
-				toreplace = 'EVAL ERROR {"error":"ERRORGOESHERE"}'.replace('ERRORGOESHERE', error)
-				output = output.replace(toreplace, '')
-				if output == '':
-					output = None
+			else:
+				error = json.loads(output.split('EVAL ERROR ')[-1])
+				error = error['error']
+				if error == 'NO ERROR':
+					success = True
+					output = output.replace('EVAL ERROR {"error":"NO ERROR"}', '')
+				else:
+					success = False
+					toreplace = 'EVAL ERROR {"error":"ERRORGOESHERE"}'.replace('ERRORGOESHERE', error)
+					output = output.replace(toreplace, '')
+					if output == '':
+						output = None
 
 			if output and len(output) > 1024:
 				# inconsistency here, results get wrapped in codeblocks when they are too large
