@@ -441,22 +441,33 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
 
 	@jsk.command(name='js', aliases=['node', 'nodejs'])
 	async def jsk_node(self, ctx: commands.Context, *, argument: CodeblockConverter):
-		code = argument.content.replace('"', '\'')
+		code = argument.content.replace('"', '\'').replace('\n', '\\n')
+# 		js2exc = '''try {{
+#   var evalout = eval("{0}");
+# }} catch(error) {{
+#   var evalerr = error;
+# }}
+
+# if(!evalerr) {{
+# 	var evalerr = "NO ERROR";
+# }}
+
+# const evaloutput = {{
+#     "error": evalerr.toString()
+# }}
+
+# console.log('EVAL ERROR ' + JSON.stringify(evaloutput));'''.format(code)
+
 		js2exc = '''try {{
-  var evalout = eval("{0}");
-}} catch(error) {{
-  var evalerr = error;
-}}
+    let code = "{0}";
+    let result = eval(code);
 
-if(!evalerr) {{
-	var evalerr = "NO ERROR";
-}}
-
-const evaloutput = {{
-    "error": evalerr.toString()
-}}
-
-console.log('EVAL ERROR ' + JSON.stringify(evaloutput));'''.format(code)
+    if (typeof result !== 'string')
+        result = require('util').inspect(result, {{depth: 0}});
+    console.log(result);
+}} catch (e) {{
+    throw new Error(e)
+}}'''.format(code)
 
 		with open('main.js', 'w') as m:
 			m.write(js2exc)
@@ -470,58 +481,27 @@ console.log('EVAL ERROR ' + JSON.stringify(evaloutput));'''.format(code)
 						output.append(line)
 
 			output = '\n'.join(output).replace('[stderr] ', '')
-			if 'C:\\Users\\Administrator\\Documents\\Geek\\Fire\\main.js:' in output:
-				error = output
-				output = None
-				success = False
+			print(output)
+			if output == 'undefined':
+				pass
 			else:
-				error = json.loads(output.split('EVAL ERROR ')[-1])
-				error = error['error']
-				if error == 'NO ERROR':
-					success = True
-					output = output.replace('EVAL ERROR {"error":"NO ERROR"}', '')
-				else:
-					success = False
-					toreplace = 'EVAL ERROR {"error":"ERRORGOESHERE"}'.replace('ERRORGOESHERE', error)
-					output = output.replace(toreplace, '')
-					if output == '':
-						output = None
+				output = output.replace('\nundefined', '')
 
 			if output and len(output) > 1024:
 				# inconsistency here, results get wrapped in codeblocks when they are too large
 				#  but don't if they're not. probably not that bad, but noting for later review
 				paginator = WrappedPaginator(prefix='```js', suffix='```', max_size=1985)
-				if not success:
-					if output:
-						paginator.add_line(output)
-						paginator.add_line('')
-						paginator.add_line('')
-						paginator.add_line(error)
-					else:
-						paginator.add_line(error)
-				else:
-					paginator.add_line(output)
-				if not success:
-					embed = discord.Embed(title="<a:fireFailed:603214400748257302> Evaluation Failed", colour=ctx.author.color)
-				else:
-					embed = discord.Embed(title="<a:fireSuccess:603214443442077708> Evaluation Complete", colour=ctx.author.color)
+				paginator.add_line(output)
+				embed = discord.Embed(title="<a:fireSuccess:603214443442077708> Evaluation Complete", colour=ctx.author.color)
 				embed.add_field(name=":inbox_tray: Input", value=f"```js\n{argument.content}```", inline=False)
 				paginatorembed = discord.Embed(colour=ctx.author.color)
 				interface = PaginatorEmbedInterface(ctx.bot, paginator, owner=ctx.author, _embed=paginatorembed)
 				await ctx.send(embed=embed)
 				await interface.send_to(ctx)
 			else:
-				if not success:
-					embed = discord.Embed(title="<a:fireFailed:603214400748257302> Evaluation Failed", colour=ctx.author.color)
-					embed.add_field(name=":inbox_tray: Input", value=f"```js\n{argument.content}```", inline=False)
-					if output:
-						embed.add_field(name=":outbox_tray: Output", value=f"```js\n{output}\n\n{error}```", inline=False)
-					else:
-						embed.add_field(name=":outbox_tray: Output", value=f"```js\n{error}```", inline=False)
-				else:
-					embed = discord.Embed(title="<a:fireSuccess:603214443442077708> Evaluation Complete", colour=ctx.author.color)
-					embed.add_field(name=":inbox_tray: Input", value=f"```js\n{argument.content}```", inline=False)
-					embed.add_field(name=":outbox_tray: Output", value=f"```js\n{output}```", inline=False)
+				embed = discord.Embed(title="<a:fireSuccess:603214443442077708> Evaluation Complete", colour=ctx.author.color)
+				embed.add_field(name=":inbox_tray: Input", value=f"```js\n{argument.content}```", inline=False)
+				embed.add_field(name=":outbox_tray: Output", value=f"```js\n{output}```", inline=False)
 				await ctx.send(embed=embed)
 
 		os.remove('main.js')
