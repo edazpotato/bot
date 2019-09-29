@@ -595,6 +595,8 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
 		await self.bot.get_cog('Utility Commands').loadfollowable()
 		await self.bot.get_cog('Utility Commands').loadfollows()
 		await self.bot.get_cog('Mod Commands').loadMutes()
+		await self.bot.get_cog('Mod Commands').loadwarns()
+		await self.bot.get_cog('Mod Commands').loadmodlogs()
 		await self.bot.get_cog('Premium Commands').loadPremiumGuilds()
 		await self.bot.get_cog('Premium Commands').loadAutoroles()
 		await self.bot.get_cog('Premium Commands').loadReactroles()
