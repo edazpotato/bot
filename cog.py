@@ -487,6 +487,9 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
 			else:
 				output = output.replace('\nundefined', '')
 
+			if 'throw new Error(e)' in output:
+				raise Exception(output.split('Error:')[-1])
+
 			if output and len(output) > 1024:
 				# inconsistency here, results get wrapped in codeblocks when they are too large
 				#  but don't if they're not. probably not that bad, but noting for later review
