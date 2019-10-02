@@ -32,6 +32,7 @@ import discord
 import humanize
 from discord.ext import commands
 from fire.push import pushbullet
+from fire.converters import User, UserWithFallback, Member, TextChannel, VoiceChannel
 
 from jishaku.codeblocks import Codeblock, CodeblockConverter
 from jishaku.exception_handling import ReplResponseReactor
@@ -675,7 +676,7 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
 
 	@jsk_voice.command(name="join", aliases=["connect"])
 	async def jsk_vc_join(self, ctx: commands.Context, *,
-						  destination: typing.Union[discord.VoiceChannel, discord.Member] = None):
+						  destination: typing.Union[VoiceChannel, Member] = None):
 		"""
 		Joins a voice channel, or moves to it if already connected.
 
@@ -816,7 +817,7 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
 		await ctx.send(f"Playing in {voice.channel.name}.")
 
 	@jsk.command(name="su")
-	async def jsk_su(self, ctx: commands.Context, target: discord.User, *, command_string: str):
+	async def jsk_su(self, ctx: commands.Context, target: UserWithFallback, *, command_string: str):
 		"""
 		Run a command as someone else.
 
@@ -839,7 +840,7 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
 		return await alt_ctx.command.invoke(alt_ctx)
 
 	@jsk.command(name="in")
-	async def jsk_in(self, ctx: commands.Context, channel: discord.TextChannel, *, command_string: str):
+	async def jsk_in(self, ctx: commands.Context, channel: TextChannel, *, command_string: str):
 		"""
 		Run a command as if it were in a different channel.
 		"""
