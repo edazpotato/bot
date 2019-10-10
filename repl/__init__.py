@@ -34,6 +34,7 @@ def get_var_dict_from_ctx(ctx: commands.Context):
         'ksoft': ctx.bot.ksoft,
         'UTILS': ctx.bot.get_cog('Utility Commands'),
         'SETTINGS': ctx.bot.get_cog('Settings'),
+        'MOD': ctx.bot.get_cog('Mod Commands'),
         'API': ctx.bot.get_cog('Fire API'),
         'PREMIUM': ctx.bot.get_cog('Premium Commands'),
         'channel': ctx.channel,
