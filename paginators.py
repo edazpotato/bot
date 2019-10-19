@@ -294,13 +294,17 @@ class PaginatorEmbedInterface(PaginatorInterface):
 
     def __init__(self, *args, **kwargs):
         self._embed = kwargs.pop('_embed', None)
+        self._footer = kwargs.pop('_footer', '')
         super().__init__(*args, **kwargs)
 
     @property
     def send_kwargs(self) -> dict:
         display_page = self.display_page
         self._embed.description = self.pages[display_page]
-        self._embed.set_footer(text=f'Page {display_page + 1}/{self.page_count}')
+        if self._footer:
+            self._embed.set_footer(text=f'Page {display_page + 1}/{self.page_count} | {self._footer}')
+        else:
+            self._embed.set_footer(text=f'Page {display_page + 1}/{self.page_count}')
         return {'embed': self._embed}
 
     max_page_size = 2048
