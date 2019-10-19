@@ -302,7 +302,7 @@ class PaginatorEmbedInterface(PaginatorInterface):
         display_page = self.display_page
         self._embed.description = self.pages[display_page]
         if self._footer:
-            self._embed.set_footer(text=f'Page {display_page + 1}/{self.page_count} | {self._footer}')
+            self._embed.set_footer(text=f'Page {display_page + 1}/{self.page_count} | {self._footer["text"]}', icon_url=self._footer["icon_url"])
         else:
             self._embed.set_footer(text=f'Page {display_page + 1}/{self.page_count}')
         return {'embed': self._embed}
