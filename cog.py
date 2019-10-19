@@ -76,6 +76,8 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
 		self.bot = bot
 		self._scope = Scope()
 		self.retain = JISHAKU_RETAIN
+		self.last_eval = 0
+		self.last_eval_paginator = 0
 		self.last_result = None
 		self.start_time = datetime.datetime.now()
 		self.tasks = collections.deque()
@@ -363,12 +365,34 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
 						await pushbullet('note', 'Attempted Token Leak', f'{ctx.author} attempted to retrieve Fire\'s token', 'https://api.gaminggeek.club')
 						return
 
+					try:
+						last_eval = await ctx.channel.fetch_message(self.last_eval)
+					except Exception:
+						last_eval = 0
+
+					try:
+						last_eval_paginator = await ctx.channel.fetch_message(self.last_eval_paginator)
+					except Exception:
+						last_eval_paginator = 0
+
 					if isinstance(result, discord.File):
-						await ctx.send(file=result)
+						if type(last_eval) == discord.Message:
+							await last_eval.edit(file=result)
+						else:
+							last_eval = await ctx.send(file=result)
+							self.last_eval = last_eval.id
 					elif isinstance(result, discord.Embed):
-						await ctx.send(embed=result)
+						if type(last_eval) == discord.Message:
+							await last_eval.edit(embed=result)
+						else:
+							last_eval = await ctx.send(embed=result)
+							self.last_eval = last_eval.id
 					elif isinstance(result, PaginatorInterface):
-						await result.send_to(ctx)
+						if type(last_eval) == discord.Message:
+							await result.send_edit(last_eval)
+						else:
+							last_eval = await result.send_to(ctx)
+							self.last_eval = last_eval.id
 					else:
 						if not isinstance(result, str):
 							# repr all non-strings
@@ -383,15 +407,27 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
 							embed.add_field(name=":inbox_tray: Input", value=f"```py\n{argument.content}```", inline=False)
 							paginatorembed = discord.Embed(colour=ctx.author.color)
 							interface = PaginatorEmbedInterface(ctx.bot, paginator, owner=ctx.author, _embed=paginatorembed)
-							await ctx.send(embed=embed)
-							await interface.send_to(ctx)
+							if type(last_eval) == discord.Message:
+								await last_eval.edit(embed=embed)
+							else:
+								last_eval = await ctx.send(embed=embed)
+								self.last_eval = last_eval.id
+							if type(last_eval_paginator) == discord.Message:
+								await interface.send_edit(last_eval_paginator)
+							else:
+								last_eval_paginator = await interface.send_to(ctx)
+								self.last_eval_paginator = last_eval_paginator.message.id
 						else:
 							if result.strip() == '':
 								result = "\u200b"
 							embed = discord.Embed(title="<a:fireSuccess:603214443442077708> Evaluation Complete", colour=ctx.author.color, description=f"Output Type: {resulttype}")
 							embed.add_field(name=":inbox_tray: Input", value=f"```py\n{argument.content}```", inline=False)
 							embed.add_field(name=":outbox_tray: Output", value=f"```py\n{result}```", inline=False)
-							await ctx.send(embed=embed)
+							if type(last_eval) == discord.Message:
+								await last_eval.edit(embed=embed)
+							else:
+								last_eval = await ctx.send(embed=embed)
+								self.last_eval = last_eval.id
 
 	@jsk.command(name="py_inspect", aliases=["pyi", "python_inspect", "pythoninspect"])
 	async def jsk_python_inspect(self, ctx: commands.Context, *, argument: CodeblockConverter):

@@ -175,6 +175,30 @@ class PaginatorInterface:  # pylint: disable=too-many-instance-attributes
 
         return self
 
+    async def send_edit(self, destination: discord.Message):
+        """
+        Sends a message to the given destination with this interface.
+
+        This automatically creates the response task for you.
+        """
+
+        self.message = destination
+        await self.message.edit(**self.send_kwargs)
+
+        # add the close reaction
+        await self.message.add_reaction(self.emojis.close)
+
+        # if there is more than one page, and the reactions haven't been sent yet, send navigation emotes
+        if not self.sent_page_reactions and self.page_count > 1:
+            await self.send_all_reactions()
+
+        if self.task:
+            self.task.cancel()
+
+        self.task = self.bot.loop.create_task(self.wait_loop())
+
+        return self
+
     async def send_all_reactions(self):
         """
         Sends all reactions for this paginator, if any are missing.
