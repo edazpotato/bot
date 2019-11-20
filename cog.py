@@ -375,6 +375,10 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
 					except Exception:
 						last_eval_paginator = 0
 
+					if not ctx.message.edited_at:
+						last_eval = 0
+						last_eval_paginator = 0
+
 					if isinstance(result, discord.File):
 						if type(last_eval) == discord.Message:
 							await last_eval.edit(file=result)
