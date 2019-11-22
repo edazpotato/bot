@@ -49,7 +49,6 @@ try:
 except ImportError:
 	psutil = None
 
-
 __all__ = (
 	"Jishaku",
 	"setup"
