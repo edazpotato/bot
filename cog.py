@@ -250,7 +250,11 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
 		async with ReplResponseReactor(ctx.message):
 			async with aiohttp.ClientSession(headers={'User-Agent': 'Fire Discord Bot'}) as session:
 				async with session.get(url) as response:
-					data = await response.read()
+					if 'application/json' in response.headers.get('Content-Type', 'text/html').lower():
+						data = await response.json()
+						data = json.dumps(data, indent=2).encode('utf-8')
+					else:
+						data = await response.read()
 					hints = (
 						response.content_type,
 						url
