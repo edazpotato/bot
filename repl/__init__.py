@@ -31,6 +31,7 @@ def get_var_dict_from_ctx(ctx: commands.Context):
         'MAIN': ctx.bot.get_cog('Main Commands'),
         'MUSIC': ctx.bot.get_cog('Music'),
         'HYPIXEL': ctx.bot.get_cog('Hypixel Commands'),
+        'YOUTUBE': ctx.bot.get_cog('YouTube API'),
         'ksoft': ctx.bot.ksoft,
         'UTILS': ctx.bot.get_cog('Utility Commands'),
         'SETTINGS': ctx.bot.get_cog('Settings'),
