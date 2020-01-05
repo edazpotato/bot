@@ -692,11 +692,15 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
 			await self.bot.db.execute(query, gid, code, inv)
 		await self.bot.db.release(con)
 		await self.bot.get_cog('Utility Commands').loadvanitys()
-		return await ctx.send(f'<a:fireSuccess:603214443442077708> Successfully created https://oh-my-god.wtf/{code}')
+		url = 'oh-my-god'
+		premium = self.bot.get_cog('Premium Commands').premiumGuilds
+		if gid in premium:
+			url = 'inv'
+		return await ctx.send(f'<a:fireSuccess:603214443442077708> Successfully created https://{url}.wtf/{code}')
 
 	@jsk.command(name='setdesc')
 	async def jsk_setdesc(self, ctx, gid: int, *, desc: str):
-		if ctx.guild.id not in self.bot.descriptions:
+		if gid not in self.bot.descriptions:
 			con = await self.bot.db.acquire()
 			async with con.transaction():
 				query = 'INSERT INTO descriptions (\"gid\", \"desc\") VALUES ($1, $2);'
