@@ -727,7 +727,7 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
 			await self.bot.db.release(con)
 		await self.bot.get_cog('Utility Commands').loaddescs()
 		return await ctx.send(f'<a:fireSuccess:603214443442077708> Successfully set description')
-	
+
 	@jsk.command(name='ack')
 	async def jsk_ack(self, ctx, user: UserWithFallback, *, ack: str): # no this doesn't mark messages as read
 		if user.id not in self.bot.acknowledgements:
@@ -747,6 +747,22 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
 		await self.loadacks()
 		return await ctx.send(f'<a:fireSuccess:603214443442077708> Successfully added acknowledgement')
 
+	@jsk.command(name='delack')
+	async def jsk_delack(self, ctx, user: UserWithFallback, *, ack: str): # no this doesn't mark messages as read
+		if user.id in self.bot.acknowledgements and ack in self.bot.acknowledgements[user.id]:
+			acks = self.bot.acknowledgements[user.id]
+			if ack not in acks:
+				return await ctx.send(f'<a:fireFailed:603214400748257302> Acknowledgement not found')
+			acks.remove(ack)
+			con = await self.bot.db.acquire()
+			async with con.transaction():
+				query = 'UPDATE ack SET \"acks\"=$2 WHERE uid = $1;'
+				await self.bot.db.execute(query, user.id, acks)
+			await self.bot.db.release(con)
+		else:
+			return await ctx.send(f'<a:fireFailed:603214400748257302> User has no acknowledgements')
+		await self.loadacks()
+		return await ctx.send(f'<a:fireSuccess:603214443442077708> Successfully deleted acknowledgement')
 
 	@jsk.group(name="voice", aliases=["vc"])
 	@commands.check(vc_check)
