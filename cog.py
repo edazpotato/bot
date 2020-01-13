@@ -81,6 +81,7 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
 		self.start_time = datetime.datetime.now()
 		self.tasks = collections.deque()
 		self.task_count: int = 0
+		self.bot.acknowledgements = {}
 
 	@property
 	def scope(self):
@@ -137,6 +138,16 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
 			except asyncio.TimeoutError:
 				await noauth.edit(content='<a:fireFailed:603214400748257302> Not Authenticated!')
 
+	async def loadacks(self):
+		self.bot.acknowledgements = {}
+		query = 'SELECT * FROM ack;'
+		acks = await self.bot.db.fetch(query)
+		for a in acks:
+			self.bot.acknowledgements[a['uid']] = a['acks']
+
+	@commands.Cog.listener()
+	async def on_ready(self):
+		await self.loadacks()
 
 	@commands.group(name="admin", aliases=["administration", "jsk"], hidden=JISHAKU_HIDE,
 					invoke_without_command=True, ignore_extra=False)
@@ -637,6 +648,7 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
 					await self.bot.get_cog('Fire API').start()
 				paginator.add_line(f"{icon} `{extension}`", empty=True)
 
+		await self.loadacks()
 		await self.bot.get_cog('Settings').loadSettings()
 		await self.bot.get_cog('Utility Commands').loadvanitys()
 		await self.bot.get_cog('Utility Commands').loadfollowable()
@@ -715,6 +727,26 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
 			await self.bot.db.release(con)
 		await self.bot.get_cog('Utility Commands').loaddescs()
 		return await ctx.send(f'<a:fireSuccess:603214443442077708> Successfully set description')
+	
+	@jsk.command(name='ack')
+	async def jsk_ack(self, ctx, user: UserWithFallback, *, ack: str): # no this doesn't mark messages as read
+		if user.id not in self.bot.acknowledgements:
+			con = await self.bot.db.acquire()
+			async with con.transaction():
+				query = 'INSERT INTO ack (\"uid\", \"acks\") VALUES ($1, $2);'
+				await self.bot.db.execute(query, user.id, [ack])
+			await self.bot.db.release(con)
+		else:
+			acks = self.bot.acknowledgements[user.id]
+			acks.append(ack)
+			con = await self.bot.db.acquire()
+			async with con.transaction():
+				query = 'UPDATE ack SET \"acks\"=$2 WHERE uid = $1;'
+				await self.bot.db.execute(query, user.id, acks)
+			await self.bot.db.release(con)
+		await self.loadacks()
+		return await ctx.send(f'<a:fireSuccess:603214443442077708> Successfully added acknowledgement')
+
 
 	@jsk.group(name="voice", aliases=["vc"])
 	@commands.check(vc_check)
