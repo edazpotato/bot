@@ -781,7 +781,7 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
                 query = 'UPDATE aliases SET \"aliases\"=$2 WHERE uid = $1;'
                 await self.bot.db.execute(query, user.id, aliases)
             await self.bot.db.release(con)
-        await self.bot.get_cog('Settings').loadSettings()
+        await self.bot.get_cog('Settings').loadAliases()
         return await ctx.success(f'Successfully added alias')
 
     @jsk.command(name='delalias')
@@ -798,7 +798,7 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
             await self.bot.db.release(con)
         else:
             return await ctx.error('Invalid alias')
-        await self.bot.get_cog('Settings').loadSettings()
+        await self.bot.get_cog('Settings').loadAliases()
         return await ctx.success(f'Successfully deleted alias')
 
     @jsk.group(name="voice", aliases=["vc"])
