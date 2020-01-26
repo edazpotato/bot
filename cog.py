@@ -75,6 +75,7 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
         self.bot = bot
         self._scope = Scope()
         self.retain = JISHAKU_RETAIN
+        self.last_evalmsg = 0
         self.last_eval = 0
         self.last_eval_paginator = 0
         self.last_result = None
@@ -389,9 +390,10 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
                     except Exception:
                         last_eval_paginator = 0
 
-                    if not ctx.message.edited_at:
+                    if not ctx.message.edited_at or ctx.message.id != self.last_evalmsg:
                         last_eval = 0
                         last_eval_paginator = 0
+                        self.last_evalmsg = ctx.message.id
 
                     if isinstance(result, discord.File):
                         if type(last_eval) == discord.Message:
