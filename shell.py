@@ -54,7 +54,7 @@ class ShellReader:
         else:
             sequence = [SHELL, '-c', code]
 
-        self.process = subprocess.Popen(sequence, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        self.process = subprocess.Popen(sequence, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         self.close_code = None
 
         self.loop = loop or asyncio.get_event_loop()
@@ -92,7 +92,6 @@ class ShellReader:
         """
         Cleans a byte sequence of shell directives and decodes it.
         """
-
         text = line.decode('utf-8').replace('\r', '').strip('\n')
         return re.sub(r'\x1b[^m]*m', '', text).replace("``", "`\u200b`").strip('\n')
 
