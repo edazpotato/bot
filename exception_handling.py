@@ -102,20 +102,20 @@ class ReactionProcedureTimer:  # pylint: disable=too-few-public-methods
 
         # no exception, check mark
         if not exc_val:
-            await attempt_add_reaction(self.message, "<a:fireSuccess:603214443442077708>")
+            await attempt_add_reaction(self.message, "<:check:674359197378281472>")
             return
 
         self.raised = True
 
         if isinstance(exc_val, (asyncio.TimeoutError, subprocess.TimeoutExpired)):
             # timed out, alarm clock
-            await attempt_add_reaction(self.message, "<a:fireFailed:603214400748257302>")
+            await attempt_add_reaction(self.message, "<:xmark:674359427830382603>")
         elif isinstance(exc_val, SyntaxError):
             # syntax error, single exclamation mark
-            await attempt_add_reaction(self.message, "<a:fireFailed:603214400748257302>")
+            await attempt_add_reaction(self.message, "<:xmark:674359427830382603>")
         else:
             # other error, double exclamation mark
-            await attempt_add_reaction(self.message, "<a:fireFailed:603214400748257302>")
+            await attempt_add_reaction(self.message, "<:xmark:674359427830382603>")
 
 
 class ReplResponseReactor(ReactionProcedureTimer):  # pylint: disable=too-few-public-methods

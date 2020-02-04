@@ -128,16 +128,16 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
                 raise commands.NotOwner("You must own this bot to use Jishaku.")
             return True
         else:
-            noauth = await ctx.send('<a:fireFailed:603214400748257302> Not Authenticated! Authenticate now to continue.')
+            noauth = await ctx.send('<:xmark:674359427830382603> Not Authenticated! Authenticate now to continue.')
             try:
                 await self.bot.wait_for('admin_authenticate', timeout=30.0)
-                await noauth.edit(content='<a:fireSuccess:603214443442077708> Successfully authenticated! Executing command...')
+                await noauth.edit(content='<:check:674359197378281472> Successfully authenticated! Executing command...')
                 if await ctx.bot.is_team_owner(ctx.author):
                     return True
                 else:
                     raise commands.NotOwner("You must own this bot to use Jishaku.")
             except asyncio.TimeoutError:
-                await noauth.edit(content='<a:fireFailed:603214400748257302> Not Authenticated!')
+                await noauth.edit(content='<:xmark:674359427830382603> Not Authenticated!')
 
     async def loadacks(self):
         self.bot.acknowledgements = {}
@@ -423,7 +423,7 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
                             #  but don't if they're not. probably not that bad, but noting for later review
                             paginator = WrappedPaginator(prefix='```py', suffix='```', max_size=1985)
                             paginator.add_line(result)
-                            embed = discord.Embed(title="<a:fireSuccess:603214443442077708> Evaluation Complete", colour=ctx.author.color, description=f"Output Type: {resulttype}")
+                            embed = discord.Embed(title="<:check:674359197378281472> Evaluation Complete", colour=ctx.author.color, description=f"Output Type: {resulttype}")
                             embed.add_field(name=":inbox_tray: Input", value=f"```py\n{argument.content}```", inline=False)
                             paginatorembed = discord.Embed(colour=ctx.author.color)
                             interface = PaginatorEmbedInterface(ctx.bot, paginator, owner=ctx.author, _embed=paginatorembed)
@@ -440,7 +440,7 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
                         else:
                             if result.strip() == '':
                                 result = "\u200b"
-                            embed = discord.Embed(title="<a:fireSuccess:603214443442077708> Evaluation Complete", colour=ctx.author.color, description=f"Output Type: {resulttype}")
+                            embed = discord.Embed(title="<:check:674359197378281472> Evaluation Complete", colour=ctx.author.color, description=f"Output Type: {resulttype}")
                             embed.add_field(name=":inbox_tray: Input", value=f"```py\n{argument.content}```", inline=False)
                             embed.add_field(name=":outbox_tray: Output", value=f"```py\n{result}```", inline=False)
                             if type(last_eval) == discord.Message:
@@ -491,7 +491,7 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
                     output.append('```')
                     res = '\n'.join(output)
 
-                    embed = discord.Embed(title="<a:fireSuccess:603214443442077708> Evaluation Complete", colour=ctx.author.color)
+                    embed = discord.Embed(title="<:check:674359197378281472> Evaluation Complete", colour=ctx.author.color)
                     embed.add_field(name=":inbox_tray: Input", value=f"```py\n{argument.content}```", inline=False)
                     embed.add_field(name=":outbox_tray: Output", value=f"{res}", inline=False)
                     await ctx.send(embed=embed)
@@ -552,14 +552,14 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
                 #  but don't if they're not. probably not that bad, but noting for later review
                 paginator = WrappedPaginator(prefix='```js', suffix='```', max_size=1985)
                 paginator.add_line(output)
-                embed = discord.Embed(title="<a:fireSuccess:603214443442077708> Evaluation Complete", colour=ctx.author.color)
+                embed = discord.Embed(title="<:check:674359197378281472> Evaluation Complete", colour=ctx.author.color)
                 embed.add_field(name=":inbox_tray: Input", value=f"```js\n{argument.content}```", inline=False)
                 paginatorembed = discord.Embed(colour=ctx.author.color)
                 interface = PaginatorEmbedInterface(ctx.bot, paginator, owner=ctx.author, _embed=paginatorembed)
                 await ctx.send(embed=embed)
                 await interface.send_to(ctx)
             else:
-                embed = discord.Embed(title="<a:fireSuccess:603214443442077708> Evaluation Complete", colour=ctx.author.color)
+                embed = discord.Embed(title="<:check:674359197378281472> Evaluation Complete", colour=ctx.author.color)
                 embed.add_field(name=":inbox_tray: Input", value=f"```js\n{argument.content}```", inline=False)
                 embed.add_field(name=":outbox_tray: Output", value=f"```js\n{output}```", inline=False)
                 await ctx.send(embed=embed)
