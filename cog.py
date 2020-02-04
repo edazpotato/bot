@@ -413,6 +413,8 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
                         else:
                             last_eval = await result.send_to(ctx)
                             self.last_eval = last_eval.id
+                    elif isinstance(result, discord.Message) and result.id > ctx.message.id:
+                        return
                     else:
                         if not isinstance(result, str):
                             # repr all non-strings
