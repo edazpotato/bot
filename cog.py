@@ -305,7 +305,7 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
         await interface.send_to(ctx)
 
     @jsk.command(name="cancel")
-    async def jsk_cancel(self, ctx: commands.Context, *, index: int):
+    async def jsk_cancel(self, ctx: commands.Context, index: int, *, name: str = None):
         """
         Cancels a task with the given index.
 
@@ -315,8 +315,13 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
         if not self.tasks:
             return await ctx.send("No tasks to cancel.")
 
-        if index == -1:
+        if index == -1 and not name:
             task = self.tasks.pop()
+        if index == -1 and name:
+            for task in self.tasks.copy():
+                if task.ctx.command.qualified_name == name:
+                    self.tasks.remove(task)
+            return await ctx.success('Successfully canceled tasks')
         else:
             task = discord.utils.get(self.tasks, index=index)
             if task:
