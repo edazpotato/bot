@@ -652,8 +652,6 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
                     empty=True
                 )
             else:
-                if extension == 'api.main':
-                    await self.bot.get_cog('Fire API').start()
                 paginator.add_line(f"{icon} `{extension}`", empty=True)
 
         await self.loadacks()
