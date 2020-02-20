@@ -712,7 +712,7 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
         await self.bot.db.release(con)
         await self.bot.get_cog('Utility Commands').loadvanitys()
         url = 'oh-my-god'
-        premium = self.bot.get_cog('Premium Commands').premiumGuilds
+        premium = self.bot.premiumGuilds
         if gid in premium:
             url = 'inv'
         return await ctx.success(f'Successfully created https://{url}.wtf/{code}')
