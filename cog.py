@@ -637,6 +637,10 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
                     await self.bot.get_cog('Fire API').stop()
                 except Exception:
                     do = 'nothing'
+                modules = sys.modules.copy()
+                for m in modules:
+                    if m.startswith('api.endpoints'):
+                        sys.modules.pop(m)
             method, icon = (
                 (self.bot.reload_extension, "\N{CLOCKWISE RIGHTWARDS AND LEFTWARDS OPEN CIRCLE ARROWS}")
                 if extension in self.bot.extensions else
