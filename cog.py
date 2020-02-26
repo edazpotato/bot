@@ -368,7 +368,9 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
 
         async with ReplResponseReactor(ctx.message):
             with self.submit(ctx):
+                start = time.perf_counter()
                 async for result in AsyncCodeExecutor(argument.content, scope, arg_dict=arg_dict):
+                    end = time.perf_counter()
                     if result is None:
                         continue
 
@@ -432,6 +434,7 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
                             paginator.add_line(result)
                             embed = discord.Embed(title="<:check:674359197378281472> Evaluation Complete", colour=ctx.author.color, description=f"Output Type: {resulttype}")
                             embed.add_field(name=":inbox_tray: Input", value=f"```py\n{argument.content}```", inline=False)
+                            embed.set_footer(text=f'Evaluated in {end - start:.3f}s.')
                             paginatorembed = discord.Embed(colour=ctx.author.color)
                             interface = PaginatorEmbedInterface(ctx.bot, paginator, owner=ctx.author, _embed=paginatorembed)
                             if type(last_eval) == discord.Message:
@@ -450,6 +453,7 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
                             embed = discord.Embed(title="<:check:674359197378281472> Evaluation Complete", colour=ctx.author.color, description=f"Output Type: {resulttype}")
                             embed.add_field(name=":inbox_tray: Input", value=f"```py\n{argument.content}```", inline=False)
                             embed.add_field(name=":outbox_tray: Output", value=f"```py\n{result}```", inline=False)
+                            embed.set_footer(text=f'Evaluated in {end - start:.3f}s.')
                             if type(last_eval) == discord.Message:
                                 await last_eval.edit(embed=embed)
                             else:
