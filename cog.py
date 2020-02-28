@@ -727,19 +727,7 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
 
     @jsk.command(name='setdesc')
     async def jsk_setdesc(self, ctx, gid: int, *, desc: str):
-        if gid not in self.bot.descriptions:
-            con = await self.bot.db.acquire()
-            async with con.transaction():
-                query = 'INSERT INTO descriptions (\"gid\", \"desc\") VALUES ($1, $2);'
-                await self.bot.db.execute(query, gid, desc)
-            await self.bot.db.release(con)
-        else:
-            con = await self.bot.db.acquire()
-            async with con.transaction():
-                query = 'UPDATE descriptions SET \"desc\"=$2 WHERE gid = $1;'
-                await self.bot.db.execute(query, gid, desc)
-            await self.bot.db.release(con)
-        await self.bot.get_cog('Utility Commands').loaddescs()
+        await self.bot.configs[gid].set('main.description', desc)
         return await ctx.success(f'Successfully set description')
 
     @jsk.command(name='ack')
