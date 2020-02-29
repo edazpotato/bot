@@ -366,7 +366,7 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
         scope.clean()
         arg_dict["_"] = self.last_result
 
-        async with ReplResponseReactor(ctx.message):
+        async with ReplResponseReactor(ctx.message, argument=argument):
             with self.submit(ctx):
                 start = time.perf_counter()
                 async for result in AsyncCodeExecutor(argument.content, scope, arg_dict=arg_dict):
@@ -423,6 +423,8 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
                             # repr all non-strings
                             result = repr(result)
 
+                        result = result.replace("``", "`\u200b`")
+
                         if len(result) > 1024:
                             # inconsistency here, results get wrapped in codeblocks when they are too large
                             #  but don't if they're not. probably not that bad, but noting for later review
@@ -471,7 +473,7 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
         scope.clean()
         arg_dict["_"] = self.last_result
 
-        async with ReplResponseReactor(ctx.message):
+        async with ReplResponseReactor(ctx.message, argument=argument):
             with self.submit(ctx):
                 async for result in AsyncCodeExecutor(argument.content, scope, arg_dict=arg_dict):
                     resultstr = str(result)
@@ -486,7 +488,7 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
                         await pushbullet('note', 'Attempted Token Leak', f'{ctx.author} attempted to retrieve Fire\'s token', 'https://api.gaminggeek.club')
                         return
 
-                    header = repr(result).replace("``", "`\u200b`").replace(self.bot.http.token, "[token omitted]")
+                    header = repr(result).replace("``", "`\u200b`")
 
                     if len(header) > 485:
                         header = header[0:482] + "..."

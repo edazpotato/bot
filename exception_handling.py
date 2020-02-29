@@ -18,6 +18,8 @@ import typing
 
 import discord
 from discord.ext import commands
+from jishaku.repl import all_inspections
+
 
 async def send_traceback(destination: discord.abc.Messageable, verbosity: int, *exc_info):
     """
@@ -85,9 +87,10 @@ class ReactionProcedureTimer:  # pylint: disable=too-few-public-methods
     """
     __slots__ = ('message', 'loop', 'handle', 'raised')
 
-    def __init__(self, message: discord.Message, loop: typing.Optional[asyncio.BaseEventLoop] = None):
+    def __init__(self, message: discord.Message, loop: typing.Optional[asyncio.BaseEventLoop] = None, argument=None):
         self.message = message
         self.loop = loop or asyncio.get_event_loop()
+        self.argument = argument
         self.handle = None
         self.raised = False
 
@@ -130,7 +133,30 @@ class ReplResponseReactor(ReactionProcedureTimer):  # pylint: disable=too-few-pu
         if not exc_val:
             return
 
-        if isinstance(exc_val, (SyntaxError, asyncio.TimeoutError, subprocess.TimeoutExpired)):
+        if isinstance(exc_val, discord.DiscordException):
+            resulttype = exc_val.__class__.__name__
+            if any(i in self.message.content for i in ["py_inspect", "pyi", "python_inspect", "pythoninspect"]):
+                embed = discord.Embed(title="<:xmark:674359427830382603> Evaluation Unsuccessful", colour=self.message.author.color, description=f"Exception: {resulttype}")
+                if self.argument:
+                    embed.add_field(name=":inbox_tray: Input", value=f"```py\n{self.argument.content}```", inline=False)
+                embed.add_field(name=":outbox_tray: Output", value=f"```py\n{exc_val}```", inline=False)
+            else:
+                header = str(exc_val)
+                if len(header) > 485:
+                    header = header[0:482] + "..."
+
+                output = []
+                output.append(f'```prolog\n=== {header} ===\n')
+                for name, res in all_inspections(exc_val):
+                    output.append(f"{name:16.16} :: {res}")
+                output.append('```')
+                res = '\n'.join(output)
+                embed = discord.Embed(title="<:xmark:674359427830382603> Evaluation Unsuccessful", colour=self.message.author.color, description=f"Exception: {resulttype}")
+                if self.argument:
+                    embed.add_field(name=":inbox_tray: Input", value=f"```py\n{self.argument.content}```", inline=False)
+                embed.add_field(name=":outbox_tray: Output", value=res, inline=False)
+            await self.message.channel.send(embed=embed)
+        elif isinstance(exc_val, (SyntaxError, asyncio.TimeoutError, subprocess.TimeoutExpired)):
             # short traceback, send to channel
             await send_traceback(self.message.channel, 0, exc_type, exc_val, exc_tb)
         else:
