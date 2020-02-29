@@ -403,11 +403,7 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
                         self.last_evalmsg = ctx.message.id
 
                     if isinstance(result, discord.File):
-                        if type(last_eval) == discord.Message:
-                            await last_eval.edit(file=result)
-                        else:
-                            last_eval = await ctx.send(file=result)
-                            self.last_eval = last_eval.id
+                        await ctx.send(file=result)
                     elif isinstance(result, discord.Embed):
                         if type(last_eval) == discord.Message:
                             await last_eval.edit(embed=result)
