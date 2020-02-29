@@ -87,8 +87,9 @@ class ReactionProcedureTimer:  # pylint: disable=too-few-public-methods
     """
     __slots__ = ('message', 'loop', 'handle', 'raised')
 
-    def __init__(self, message: discord.Message, loop: typing.Optional[asyncio.BaseEventLoop] = None, argument=None):
-        self.message = message
+    def __init__(self, ctx: commands.Context, loop: typing.Optional[asyncio.BaseEventLoop] = None, argument=None):
+        self.ctx = ctx
+        self.message = self.ctx.message
         self.loop = loop or asyncio.get_event_loop()
         self.argument = argument
         self.handle = None
@@ -135,12 +136,12 @@ class ReplResponseReactor(ReactionProcedureTimer):  # pylint: disable=too-few-pu
 
         if isinstance(exc_val, discord.DiscordException):
             resulttype = exc_val.__class__.__name__
-            if any(i in self.message.content for i in ["py_inspect", "pyi", "python_inspect", "pythoninspect"]):
-                embed = discord.Embed(title="<:xmark:674359427830382603> Evaluation Unsuccessful", colour=self.message.author.color, description=f"Exception: {resulttype}")
+            if self.ctx.command.name == 'py':
+                embed = discord.Embed(title="<:xmark:674359427830382603> Evaluation Unsuccessful", colour=self.ctx.author.color, description=f"Exception: {resulttype}")
                 if self.argument:
                     embed.add_field(name=":inbox_tray: Input", value=f"```py\n{self.argument.content}```", inline=False)
                 embed.add_field(name=":outbox_tray: Output", value=f"```py\n{exc_val}```", inline=False)
-            else:
+            elif self.ctx.command.name == 'py_inspect':
                 header = str(exc_val)
                 if len(header) > 485:
                     header = header[0:482] + "..."
@@ -151,7 +152,7 @@ class ReplResponseReactor(ReactionProcedureTimer):  # pylint: disable=too-few-pu
                     output.append(f"{name:16.16} :: {res}")
                 output.append('```')
                 res = '\n'.join(output)
-                embed = discord.Embed(title="<:xmark:674359427830382603> Evaluation Unsuccessful", colour=self.message.author.color, description=f"Exception: {resulttype}")
+                embed = discord.Embed(title="<:xmark:674359427830382603> Evaluation Unsuccessful", colour=self.ctx.author.color, description=f"Exception: {resulttype}")
                 if self.argument:
                     embed.add_field(name=":inbox_tray: Input", value=f"```py\n{self.argument.content}```", inline=False)
                 embed.add_field(name=":outbox_tray: Output", value=res, inline=False)

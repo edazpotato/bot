@@ -259,7 +259,7 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
             else:
                 url = f'{url}?key={self.bot.hypixelkey}'
 
-        async with ReplResponseReactor(ctx.message):
+        async with ReplResponseReactor(ctx):
             async with aiohttp.ClientSession(headers={'User-Agent': 'Fire Discord Bot'}) as session:
                 async with session.get(url) as response:
                     if 'application/json' in response.headers.get('Content-Type', 'text/html').lower():
@@ -366,7 +366,7 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
         scope.clean()
         arg_dict["_"] = self.last_result
 
-        async with ReplResponseReactor(ctx.message, argument=argument):
+        async with ReplResponseReactor(ctx, argument=argument):
             with self.submit(ctx):
                 start = time.perf_counter()
                 async for result in AsyncCodeExecutor(argument.content, scope, arg_dict=arg_dict):
@@ -473,7 +473,7 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
         scope.clean()
         arg_dict["_"] = self.last_result
 
-        async with ReplResponseReactor(ctx.message, argument=argument):
+        async with ReplResponseReactor(ctx, argument=argument):
             with self.submit(ctx):
                 async for result in AsyncCodeExecutor(argument.content, scope, arg_dict=arg_dict):
                     resultstr = str(result)
@@ -505,76 +505,6 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
                     embed.add_field(name=":outbox_tray: Output", value=f"{res}", inline=False)
                     await ctx.send(embed=embed)
 
-    @jsk.command(name='js', aliases=['node', 'nodejs'])
-    async def jsk_node(self, ctx: commands.Context, *, argument: CodeblockConverter):
-        code = argument.content.replace('"', '\'').replace('\n', '\\n')
-# 		js2exc = '''try {{
-#   var evalout = eval("{0}");
-# }} catch(error) {{
-#   var evalerr = error;
-# }}
-
-# if(!evalerr) {{
-# 	var evalerr = "NO ERROR";
-# }}
-
-# const evaloutput = {{
-#     "error": evalerr.toString()
-# }}
-
-# console.log('EVAL ERROR ' + JSON.stringify(evaloutput));'''.format(code)
-
-        js2exc = '''try {{
-    let code = "{0}";
-    let result = eval(code);
-
-    if (typeof result !== 'string')
-        result = require('util').inspect(result, {{depth: 0}});
-    console.log(result);
-}} catch (e) {{
-    throw new Error(e)
-}}'''.format(code)
-
-        with open('main.js', 'w') as m:
-            m.write(js2exc)
-
-        output = []
-
-        async with ReplResponseReactor(ctx.message):
-            with self.submit(ctx):
-                with ShellReader('node main.js') as reader:
-                    async for line in reader:
-                        output.append(line)
-
-            output = '\n'.join(output).replace('[stderr] ', '')
-            print(output)
-            if output == 'undefined':
-                pass
-            else:
-                output = output.replace('\nundefined', '')
-
-            if 'throw new Error(e)' in output:
-                raise Exception(output.split('Error:')[-1])
-
-            if output and len(output) > 1024:
-                # inconsistency here, results get wrapped in codeblocks when they are too large
-                #  but don't if they're not. probably not that bad, but noting for later review
-                paginator = WrappedPaginator(prefix='```js', suffix='```', max_size=1985)
-                paginator.add_line(output)
-                embed = discord.Embed(title="<:check:674359197378281472> Evaluation Complete", colour=ctx.author.color)
-                embed.add_field(name=":inbox_tray: Input", value=f"```js\n{argument.content}```", inline=False)
-                paginatorembed = discord.Embed(colour=ctx.author.color)
-                interface = PaginatorEmbedInterface(ctx.bot, paginator, owner=ctx.author, _embed=paginatorembed)
-                await ctx.send(embed=embed)
-                await interface.send_to(ctx)
-            else:
-                embed = discord.Embed(title="<:check:674359197378281472> Evaluation Complete", colour=ctx.author.color)
-                embed.add_field(name=":inbox_tray: Input", value=f"```js\n{argument.content}```", inline=False)
-                embed.add_field(name=":outbox_tray: Output", value=f"```js\n{output}```", inline=False)
-                await ctx.send(embed=embed)
-
-        os.remove('main.js')
-
     @jsk.command(name="shell", aliases=["sh", "cmd"])
     async def jsk_shell(self, ctx: commands.Context, *, argument: CodeblockConverter):
         """
@@ -583,7 +513,7 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
         This uses the bash shell. Execution can be cancelled by closing the paginator.
         """
 
-        async with ReplResponseReactor(ctx.message):
+        async with ReplResponseReactor(ctx):
             with self.submit(ctx):
                 paginator = WrappedPaginator(prefix="```sh", max_size=1985)
                 paginator.add_line(f"$ {argument.content}\n")
@@ -1046,7 +976,7 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
 
         start = time.perf_counter()
 
-        async with ReplResponseReactor(ctx.message):
+        async with ReplResponseReactor(ctx):
             with self.submit(ctx):
                 await alt_ctx.command.invoke(alt_ctx)
 
