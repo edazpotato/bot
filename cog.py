@@ -566,6 +566,7 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
         for extension in itertools.chain(*extensions):
             if extension == 'api.main':
                 try:
+                    self.bot.realtime_members = False
                     await self.bot.get_cog('Fire API').stop()
                 except Exception:
                     do = 'nothing'
@@ -591,21 +592,7 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
                 paginator.add_line(f"{icon} `{extension}`", empty=True)
 
         await self.loadacks()
-        # await self.bot.get_cog('Settings').loadSettings()
-        # await self.bot.get_cog('Utility Commands').loadvanitys()
-        # await self.bot.get_cog('Utility Commands').loadfollowable()
-        # await self.bot.get_cog('Utility Commands').loadfollows()
-        # await self.bot.get_cog('Utility Commands').loadtags()
-        # await self.bot.get_cog('Utility Commands').loaddescs()
-        # await self.bot.get_cog('Utility Commands').loadremind()
-        # await self.bot.get_cog('Mod Commands').loadMutes()
-        # await self.bot.get_cog('Mod Commands').loadwarns()
-        # await self.bot.get_cog('Mod Commands').loadmodlogs()
-        # await self.bot.get_cog('Premium Commands').loadPremiumGuilds()
-        # await self.bot.get_cog('Premium Commands').loadAutoroles()
-        # await self.bot.get_cog('Premium Commands').loadReactroles()
-        # await self.bot.get_cog('Premium Commands').loadJoinRoles()
-        # await self.bot.get_cog('Premium Commands').loadRolePersist()
+        self.bot.realtime_members = True
 
         for page in paginator.pages:
             await ctx.send(page)
