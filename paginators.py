@@ -132,7 +132,7 @@ class PaginatorInterface:  # pylint: disable=too-many-instance-attributes
         display_page = self.display_page
         page_num = f'\nPage {display_page + 1}/{self.page_count}'
         content = self.pages[display_page] + page_num
-        return {'content': content, 'paginator': True}
+        return {'content': content}
 
     async def add_line(self, *args, **kwargs):
         """
@@ -329,7 +329,7 @@ class PaginatorEmbedInterface(PaginatorInterface):
             self._embed.set_footer(text=f'Page {display_page + 1}/{self.page_count} | {self._footer["text"]}', icon_url=self._footer["icon_url"])
         else:
             self._embed.set_footer(text=f'Page {display_page + 1}/{self.page_count}')
-        return {'embed': self._embed, 'paginator': True}
+        return {'embed': self._embed}
 
     max_page_size = 2048
 
