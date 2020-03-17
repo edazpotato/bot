@@ -141,6 +141,7 @@ class ReplResponseReactor(ReactionProcedureTimer):  # pylint: disable=too-few-pu
                 if self.argument:
                     embed.add_field(name=":inbox_tray: Input", value=f"```py\n{self.argument.content}```", inline=False)
                 embed.add_field(name=":outbox_tray: Output", value=f"```py\n{exc_val}```", inline=False)
+                await self.message.channel.send(embed=embed)
             elif self.ctx.command.name == 'py_inspect':
                 header = str(exc_val)
                 if len(header) > 485:
@@ -156,7 +157,9 @@ class ReplResponseReactor(ReactionProcedureTimer):  # pylint: disable=too-few-pu
                 if self.argument:
                     embed.add_field(name=":inbox_tray: Input", value=f"```py\n{self.argument.content}```", inline=False)
                 embed.add_field(name=":outbox_tray: Output", value=res, inline=False)
-            await self.message.channel.send(embed=embed)
+                await self.message.channel.send(embed=embed)
+            else:
+                await send_traceback(self.message.author, 8, exc_type, exc_val, exc_tb)
         elif isinstance(exc_val, (SyntaxError, asyncio.TimeoutError, subprocess.TimeoutExpired)):
             # short traceback, send to channel
             await send_traceback(self.message.channel, 0, exc_type, exc_val, exc_tb)
