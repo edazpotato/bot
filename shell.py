@@ -52,9 +52,9 @@ class ShellReader:
         if WINDOWS:
             sequence = shlex.split(code)
         else:
-            sequence = [SHELL, '-c', code]
+            sequence = [code]
 
-        self.process = subprocess.Popen(sequence, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        self.process = subprocess.Popen(sequence, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         self.close_code = None
 
         self.loop = loop or asyncio.get_event_loop()
