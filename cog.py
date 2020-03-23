@@ -634,11 +634,7 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
             await self.bot.db.execute(query, gid, code, inv)
         await self.bot.db.release(con)
         await self.bot.get_cog('Utility Commands').loadvanitys()
-        url = 'oh-my-god'
-        premium = self.bot.premiumGuilds
-        if gid in premium:
-            url = 'inv'
-        return await ctx.success(f'Successfully created https://{url}.wtf/{code}')
+        return await ctx.success(f'Successfully created https://inv.wtf/{code}')
 
     @jsk.command(name='setdesc')
     async def jsk_setdesc(self, ctx, gid: int, *, desc: str):
