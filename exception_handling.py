@@ -134,7 +134,7 @@ class ReplResponseReactor(ReactionProcedureTimer):  # pylint: disable=too-few-pu
         if not exc_val:
             return
 
-        if isinstance(exc_val, (discord.DiscordException, NameError)):
+        if isinstance(exc_val, (discord.DiscordException, NameError, AttributeError, ZeroDivisionError)):
             resulttype = exc_val.__class__.__name__
             if self.ctx.command.name == 'py':
                 embed = discord.Embed(title="<:xmark:674359427830382603> Evaluation Unsuccessful", colour=self.ctx.author.color, description=f"Exception: {resulttype}")
