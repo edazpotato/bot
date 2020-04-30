@@ -54,7 +54,7 @@ class PaginatorInterface:  # pylint: disable=too-many-instance-attributes
 
         self.owner = kwargs.pop('owner', None)
         self.emojis = kwargs.pop('emoji', EMOJI_DEFAULT)
-        self.timeout = kwargs.pop('timeout', 7200)
+        self.timeout = kwargs.pop('timeout', 600)
         self.delete_message = kwargs.pop('delete_message', False)
 
         self.sent_page_reactions = False
@@ -258,7 +258,7 @@ class PaginatorInterface:  # pylint: disable=too-many-instance-attributes
 
             for emoji in filter(None, self.emojis):
                 try:
-                    await self.message.remove_reaction(emoji, self.message.guild.me)
+                    await self.message.remove_reaction(emoji, self.message.guild.me if self.message.guild else self.bot)
                 except (discord.Forbidden, discord.NotFound):
                     pass
 
