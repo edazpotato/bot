@@ -31,7 +31,6 @@ import typing
 import discord
 import humanize
 from discord.ext import commands
-from fire.push import pushbullet
 from fire.converters import User, UserWithFallback, Member, TextChannel, VoiceChannel
 
 from jishaku.codeblocks import Codeblock, CodeblockConverter
@@ -375,13 +374,9 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
                     self.last_result = result
                     resulttype = result.__class__.__name__
                     if self.bot.http.token in resultstr:
-                        result = '[result hidden for security reasons]'
-                        await pushbullet('note', 'Attempted Token Leak', f'{ctx.author} attempted to retrieve Fire\'s token', 'https://api.gaminggeek.club')
                         return
                     tokenlist = self.bot.http.token.split('.')
                     if any(x in resultstr for x in tokenlist):
-                        result = '[result hidden for security reasons]'
-                        await pushbullet('note', 'Attempted Token Leak', f'{ctx.author} attempted to retrieve Fire\'s token', 'https://api.gaminggeek.club')
                         return
 
                     if isinstance(result, discord.File):
@@ -441,13 +436,9 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
                     resultstr = str(result)
                     self.last_result = result
                     if self.bot.http.token in resultstr:
-                        result = '[result hidden for security reasons]'
-                        await pushbullet('note', 'Attempted Token Leak', f'{ctx.author} attempted to retrieve Fire\'s token', 'https://api.gaminggeek.club')
                         return
                     tokenlist = self.bot.http.token.split('.')
                     if any(x in resultstr for x in tokenlist):
-                        result = '[result hidden for security reasons]'
-                        await pushbullet('note', 'Attempted Token Leak', f'{ctx.author} attempted to retrieve Fire\'s token', 'https://api.gaminggeek.club')
                         return
 
                     header = repr(result).replace("``", "`\u200b`")
