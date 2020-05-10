@@ -78,7 +78,6 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
         self.start_time = datetime.datetime.now()
         self.tasks = collections.deque()
         self.task_count: int = 0
-        self.bot.acknowledgements = {}
 
     @property
     def scope(self):
@@ -135,16 +134,6 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
             except asyncio.TimeoutError:
                 await noauth.edit(content='<:xmark:674359427830382603> Not Authenticated!')
 
-    async def loadacks(self):
-        self.bot.acknowledgements = {}
-        query = 'SELECT * FROM ack;'
-        acks = await self.bot.db.fetch(query)
-        for a in acks:
-            self.bot.acknowledgements[a['uid']] = a['acks']
-
-    @commands.Cog.listener()
-    async def on_ready(self):
-        await self.loadacks()
 
     @commands.group(name="admin", aliases=["administration", "jsk"], hidden=JISHAKU_HIDE,
                     invoke_without_command=True, ignore_extra=False)
@@ -544,7 +533,6 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
             else:
                 paginator.add_line(f"{icon} `{extension}`", empty=True)
 
-        await self.loadacks()
         self.bot.realtime_members = True
 
         for page in paginator.pages:
@@ -586,49 +574,19 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
             query = 'INSERT INTO vanity (\"gid\", \"code\", \"invite\") VALUES ($1, $2, $3);'
             await self.bot.db.execute(query, gid, code, inv)
         await self.bot.db.release(con)
-        await self.bot.get_cog('Utility Commands').loadvanitys()
+        self.bot.vanity_urls[code.lower()] = {
+            'gid': gid,
+            'invite': inv,
+            'code': code,
+            'clicks': 0,
+            'links': 0
+        }
         return await ctx.success(f'Successfully created https://inv.wtf/{code}')
 
     @jsk.command(name='setdesc')
     async def jsk_setdesc(self, ctx, gid: int, *, desc: str):
         await self.bot.configs[gid].set('main.description', desc)
         return await ctx.success(f'Successfully set description')
-
-    @jsk.command(name='ack')
-    async def jsk_ack(self, ctx, user: UserWithFallback, *, ack: str):  # no this doesn't mark messages as read
-        if user.id not in self.bot.acknowledgements:
-            con = await self.bot.db.acquire()
-            async with con.transaction():
-                query = 'INSERT INTO ack (\"uid\", \"acks\") VALUES ($1, $2);'
-                await self.bot.db.execute(query, user.id, [ack])
-            await self.bot.db.release(con)
-        else:
-            acks = self.bot.acknowledgements[user.id]
-            acks.append(ack)
-            con = await self.bot.db.acquire()
-            async with con.transaction():
-                query = 'UPDATE ack SET \"acks\"=$2 WHERE uid = $1;'
-                await self.bot.db.execute(query, user.id, acks)
-            await self.bot.db.release(con)
-        await self.loadacks()
-        return await ctx.success(f'Successfully added acknowledgement')
-
-    @jsk.command(name='delack')
-    async def jsk_delack(self, ctx, user: UserWithFallback, *, ack: str):  # no this doesn't mark messages as read
-        if user.id in self.bot.acknowledgements and ack in self.bot.acknowledgements[user.id]:
-            acks = self.bot.acknowledgements[user.id]
-            if ack not in acks:
-                return await ctx.error('Acknowledgement not found')
-            acks.remove(ack)
-            con = await self.bot.db.acquire()
-            async with con.transaction():
-                query = 'UPDATE ack SET \"acks\"=$2 WHERE uid = $1;'
-                await self.bot.db.execute(query, user.id, acks)
-            await self.bot.db.release(con)
-        else:
-            return await ctx.error('User has no acknowledgements')
-        await self.loadacks()
-        return await ctx.success(f'Successfully deleted acknowledgement')
 
     @jsk.command(name='alias')
     async def jsk_alias(self, ctx, user: UserWithFallback, *, alias: str):
