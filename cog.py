@@ -508,7 +508,6 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
         for extension in itertools.chain(*extensions):
             if extension == 'api.main':
                 try:
-                    self.bot.realtime_members = False
                     await self.bot.get_cog('Fire API').stop()
                 except Exception:
                     do = 'nothing'
@@ -533,7 +532,6 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
             else:
                 paginator.add_line(f"{icon} `{extension}`", empty=True)
 
-        self.bot.realtime_members = True
 
         for page in paginator.pages:
             await ctx.send(page)
