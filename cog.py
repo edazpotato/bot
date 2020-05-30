@@ -247,9 +247,18 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
         async with ReplResponseReactor(ctx):
             async with aiohttp.ClientSession(headers={'User-Agent': 'Fire Discord Bot'}) as session:
                 async with session.get(url) as response:
-                    if 'application/json' in response.headers.get('Content-Type', 'text/html').lower():
+                    content_type = response.headers.get('Content-Type', 'text/plain').lower()
+                    if content_type == 'application/json':
                         data = await response.json()
                         data = json.dumps(data, indent=2).encode('utf-8')
+                    elif content_type.startswith('image/'):
+                        ext = content_type.split('image/')[-1]
+                        f = discord.File(io.BytesIO((await response.read())), filename=f'image.{ext}')
+                        return await ctx.send(file=f)
+                    elif any(ext in content_type for ext in ['png', 'jpg', 'jpeg', 'gif']):
+                        ext = [ext for ext in ['png', 'jpg', 'jpeg', 'gif'] if ext in content_type][0]
+                        f = discord.File(io.BytesIO((await response.read())), filename=f'image.{ext}')
+                        return await ctx.send(file=f)
                     else:
                         data = await response.read()
                     hints = (
