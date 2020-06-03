@@ -306,25 +306,28 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
         If the index passed is -1, will cancel the last task instead.
         """
 
-        if not self.tasks:
-            return await ctx.send("No tasks to cancel.")
 
-        if index == -1 and not name:
-            task = self.tasks.pop()
+        if not self.tasks:
+            return await ctx.error("No tasks to cancel.")
+
         if index == -1 and name:
             for task in self.tasks.copy():
                 if task.ctx.command.qualified_name == name:
-                    self.tasks.remove(task)
+                    task = discord.utils.get(self.tasks, index=task.index)
+                    if task:
+                        task.task.cancel()
+                        self.tasks.remove(task)
             return await ctx.success('Successfully canceled tasks')
+        elif index == -1:
+            index = self.tasks[-1].index
+        task = discord.utils.get(self.tasks, index=index)
+        if task:
+            self.tasks.remove(task)
         else:
-            task = discord.utils.get(self.tasks, index=index)
-            if task:
-                self.tasks.remove(task)
-            else:
-                return await ctx.send("Unknown task.")
+            return await ctx.error("Unknown task.")
 
         task.task.cancel()
-        return await ctx.send(f"Cancelled task {task.index}: `{task.ctx.command.qualified_name}`,"
+        return await ctx.success(f"Cancelled task {task.index}: `{task.ctx.command.qualified_name}`,"
                               f" invoked at {task.ctx.message.created_at.strftime('%Y-%m-%d %H:%M:%S')} UTC")
 
     @jsk.command(name="retain")
@@ -514,16 +517,19 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
 
         paginator = commands.Paginator(prefix='', suffix='')
 
+        tasks = None
         for extension in itertools.chain(*extensions):
             if extension == 'api.main':
                 try:
                     await self.bot.get_cog('Fire API').stop()
                 except Exception:
-                    do = 'nothing'
+                    pass
                 modules = sys.modules.copy()
                 for m in modules:
                     if m.startswith('api.endpoints'):
                         sys.modules.pop(m)
+            if extension == 'jishaku':
+                tasks = self.tasks.copy()
             method, icon = (
                 (self.bot.reload_extension, "\N{CLOCKWISE RIGHTWARDS AND LEFTWARDS OPEN CIRCLE ARROWS}")
                 if extension in self.bot.extensions else
@@ -540,6 +546,8 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
                 )
             else:
                 paginator.add_line(f"{icon} `{extension}`", empty=True)
+                if tasks:
+                    self.bot.get_cog('Jishaku').tasks = tasks
 
 
         for page in paginator.pages:
