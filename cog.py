@@ -118,21 +118,9 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
         """
         Local check, makes all commands in this cog owner-only
         """
-        if ctx.bot.authenticated:
-            if not await ctx.bot.is_team_owner(ctx.author):
-                raise commands.NotOwner("You must own this bot to use Jishaku.")
-            return True
-        else:
-            noauth = await ctx.send('<:xmark:674359427830382603> Not Authenticated! Authenticate now to continue.')
-            try:
-                await self.bot.wait_for('admin_authenticate', timeout=30.0)
-                await noauth.edit(content='<:check:674359197378281472> Successfully authenticated! Executing command...')
-                if await ctx.bot.is_team_owner(ctx.author):
-                    return True
-                else:
-                    raise commands.NotOwner("You must own this bot to use Jishaku.")
-            except asyncio.TimeoutError:
-                await noauth.edit(content='<:xmark:674359427830382603> Not Authenticated!')
+        if not await ctx.bot.is_owner(ctx.author):
+            raise commands.NotOwner("You must own this bot to use Jishaku.")
+        return True
 
 
     @commands.group(name="admin", aliases=["administration", "jsk"], hidden=JISHAKU_HIDE,
