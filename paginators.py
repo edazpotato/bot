@@ -244,6 +244,7 @@ class PaginatorInterface:  # pylint: disable=too-many-instance-attributes
                     emoji = emoji.name
 
                 if emoji == close:
+                    self.bot.paginators.pop(self.message.id)
                     await self.message.delete()
                     return
 
@@ -264,6 +265,7 @@ class PaginatorInterface:  # pylint: disable=too-many-instance-attributes
                     pass
 
         except (asyncio.CancelledError, asyncio.TimeoutError):
+            self.bot.paginators.pop(self.message.id)
             if self.delete_message:
                 return await self.message.delete()
 
