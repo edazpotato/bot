@@ -586,14 +586,16 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
     async def jsk_alias(self, ctx, user: UserWithFallback, *, alias: str):
         if alias.lower() == 'hasalias':
             return await ctx.error('"hasalias" cannot be used as an alias')
-        if user.id not in self.bot.aliases['hasalias']:
+        hasalias = json.loads((await self.bot.redis.get('hasalias', encoding='utf-8')))
+        if user.id not in hasalias:
             con = await self.bot.db.acquire()
             async with con.transaction():
                 query = 'INSERT INTO aliases (\"uid\", \"aliases\") VALUES ($1, $2);'
                 await self.bot.db.execute(query, user.id, [alias])
             await self.bot.db.release(con)
         else:
-            aliases = [a for a in self.bot.aliases if a != 'hasalias' and self.bot.aliases[a] == user.id]
+            aliases = json.loads((await self.bot.redis.get('aliases', encoding='utf-8')))
+            aliases = [a for a in aliases if aliases[a] == user.id]
             aliases.append(alias)
             con = await self.bot.db.acquire()
             async with con.transaction():
