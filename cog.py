@@ -60,8 +60,6 @@ JISHAKU_RETAIN = os.getenv("JISHAKU_RETAIN", "").lower() in ENABLED_SYMBOLS
 
 CommandTask = collections.namedtuple("CommandTask", "index ctx task")
 
-print('Loading Jishaku....')
-
 
 class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
     """
@@ -577,14 +575,7 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
             query = 'INSERT INTO vanity (\"gid\", \"code\", \"invite\") VALUES ($1, $2, $3);'
             await self.bot.db.execute(query, gid, code, inv)
         await self.bot.db.release(con)
-        self.bot.vanity_urls[code.lower()] = {
-            'gid': gid,
-            'invite': inv,
-            'code': code,
-            'clicks': 0,
-            'links': 0
-        }
-        return await ctx.success(f'Successfully created https://inv.wtf/{code}')
+        return await ctx.success(f'Successfully created https://{"test." if self.bot.dev else ""}inv.wtf/{code}')
 
     @jsk.command(name='setdesc')
     async def jsk_setdesc(self, ctx, gid: int, *, desc: str):
