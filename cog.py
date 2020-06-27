@@ -800,7 +800,7 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
             #  the command more compatible with chaining, e.g. `jsk in .. jsk su ..`
             target = ctx.guild.get_member(target.id) or target
 
-        alt_ctx = await copy_context_with(ctx, author=target, content=ctx.prefix + command_string)
+        alt_ctx = await copy_context_with(ctx, author=target, content=ctx.prefix + command_string, silent=ctx.silent)
 
         if alt_ctx.command is None:
             if alt_ctx.invoked_with is None:
@@ -815,7 +815,7 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
         Run a command as if it were in a different channel.
         """
 
-        alt_ctx = await copy_context_with(ctx, channel=channel, content=ctx.prefix + command_string)
+        alt_ctx = await copy_context_with(ctx, channel=channel, content=ctx.prefix + command_string, silent=ctx.silent)
 
         if alt_ctx.command is None:
             return await ctx.send(f'Command "{alt_ctx.invoked_with}" is not found')
@@ -830,7 +830,7 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
         This also bypasses permission checks so this has a high possibility of making a command raise.
         """
 
-        alt_ctx = await copy_context_with(ctx, content=ctx.prefix + command_string)
+        alt_ctx = await copy_context_with(ctx, content=ctx.prefix + command_string, silent=ctx.silent)
 
         if alt_ctx.command is None:
             return await ctx.send(f'Command "{alt_ctx.invoked_with}" is not found')
@@ -846,7 +846,7 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
 
         with self.submit(ctx):  # allow repeats to be cancelled
             for _ in range(times):
-                alt_ctx = await copy_context_with(ctx, content=ctx.prefix + command_string)
+                alt_ctx = await copy_context_with(ctx, content=ctx.prefix + command_string, silent=ctx.silent)
 
                 if alt_ctx.command is None:
                     return await ctx.send(f'Command "{alt_ctx.invoked_with}" is not found')
@@ -859,7 +859,7 @@ class Jishaku(commands.Cog):  # pylint: disable=too-many-public-methods
         Run a command timing execution and catching exceptions.
         """
 
-        alt_ctx = await copy_context_with(ctx, content=ctx.prefix + command_string)
+        alt_ctx = await copy_context_with(ctx, content=ctx.prefix + command_string, silent=ctx.silent)
 
         if alt_ctx.command is None:
             return await ctx.send(f'Command "{alt_ctx.invoked_with}" is not found')
